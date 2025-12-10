@@ -4,26 +4,26 @@ using UnityEngine;
 namespace UI
 {
     /// <summary>
-    /// UI 更新工具类
+    /// UI update utility class
     /// </summary>
-    public static class UI
+    public static class UITools
     {
         /// <summary>
-        /// 更新 GameObject 上的所有 DataBinder 组件
+        /// Update all DataBinder components on GameObject
         /// </summary>
-        /// <param name="gameObject">要更新的 GameObject</param>
-        /// <param name="data">数据对象（必须与 DataBinder 上配置的类型匹配）</param>
+        /// <param name="gameObject">GameObject to update</param>
+        /// <param name="data">Data object (must match the type configured on DataBinder)</param>
         public static void Update(GameObject gameObject, object data)
         {
             if (gameObject == null)
             {
-                Debug.LogError("[UI.Update] GameObject 为 null");
+                Debug.LogError("[UITools.Update] GameObject is null");
                 return;
             }
 
             if (data == null)
             {
-                Debug.LogError("[UI.Update] 数据为 null");
+                Debug.LogError("[UITools.Update] Data is null");
                 return;
             }
 
@@ -39,7 +39,7 @@ namespace UI
             
             if (binders.Length == 0)
             {
-                Debug.LogWarning($"[UI.Update] {gameObject.name}: 未找到 DataBinder 组件");
+                Debug.LogWarning($"[UITools.Update] {gameObject.name}: No DataBinder component found");
                 return;
             }
 
@@ -63,13 +63,13 @@ namespace UI
 
             System.Type valueType = value.GetType();
             
-            // 检查是否实现了 IList 接口（包括 List<T>, Array 等）
+            // Check if implements IList interface (including List<T>, Array, etc.)
             if (valueType.IsArray)
                 return true;
             
             if (typeof(IList).IsAssignableFrom(valueType))
             {
-                // 排除字符串（虽然实现了 IList，但应该作为普通文本显示）
+                // Exclude string (although it implements IList, it should be displayed as normal text)
                 if (valueType == typeof(string))
                     return false;
                 return true;
@@ -79,20 +79,20 @@ namespace UI
         }
 
         /// <summary>
-        /// 更新 List 类型数据的显示
+        /// Update display for List type data
         /// </summary>
         private static void UpdateListDisplay(GameObject gameObject, object listValue)
         {
             IList list = listValue as IList;
             if (list == null)
             {
-                Debug.LogWarning($"[UI.Update] {gameObject.name}: List 值为 null");
+                Debug.LogWarning($"[UITools.Update] {gameObject.name}: List value is null");
                 return;
             }
 
             Transform transform = gameObject.transform;
 
-            // 获取子节点模板（第一个子节点作为模板）
+            // Get child node template (first child node as template)
             Transform templateChild = null;
             if (transform.childCount > 0)
             {
@@ -101,18 +101,18 @@ namespace UI
 
             if (templateChild == null)
             {
-                Debug.LogWarning($"[UI.Update] {gameObject.name}: 没有子节点作为模板");
+                Debug.LogWarning($"[UITools.Update] {gameObject.name}: No child node as template");
                 return;
             }
 
-            // 确保有足够的子节点来显示所有 List 元素
+            // Ensure there are enough child nodes to display all List elements
             int listCount = list.Count;
             int currentChildCount = transform.childCount;
 
-            // 创建或删除子节点以匹配 List 数量
+            // Create or delete child nodes to match List count
             if (listCount > currentChildCount)
             {
-                // 需要创建更多子节点
+                // Need to create more child nodes
                 for (int i = currentChildCount; i < listCount; i++)
                 {
                     GameObject newChild = Object.Instantiate(templateChild.gameObject, transform);
@@ -121,7 +121,7 @@ namespace UI
             }
             else if (listCount < currentChildCount)
             {
-                // 需要删除多余的子节点（保留模板）
+                // Need to delete excess child nodes (keep template)
                 for (int i = transform.childCount - 1; i >= listCount; i--)
                 {
                     Transform childToRemove = transform.GetChild(i);
@@ -139,7 +139,7 @@ namespace UI
                 }
             }
 
-            // 更新每个直接子节点的 DataBinder（只使用下一层节点）
+            // Update DataBinder for each direct child node (only use next level nodes)
             for (int i = 0; i < listCount; i++)
             {
                 Transform child = transform.GetChild(i);
@@ -148,7 +148,7 @@ namespace UI
                 Update(child.gameObject, item);
             }
 
-            // 隐藏或显示模板节点
+            // Hide or show template node
             if (listCount > 0)
             {
                 templateChild.gameObject.SetActive(true);
@@ -160,7 +160,7 @@ namespace UI
         }
 
         /// <summary>
-        /// 更新指定 GameObject 上的 DataBinder 组件
+        /// Update DataBinder component on specified GameObject
         /// </summary>
         public static void Update(Component component, object data)
         {
@@ -171,13 +171,13 @@ namespace UI
         }
 
         /// <summary>
-        /// 更新指定 GameObject 上的单个 DataBinder 组件
+        /// Update single DataBinder component on specified GameObject
         /// </summary>
         public static void UpdateSingle(GameObject gameObject, object data)
         {
             if (gameObject == null)
             {
-                Debug.LogError("[UI.UpdateSingle] GameObject 为 null");
+                Debug.LogError("[UITools.UpdateSingle] GameObject is null");
                 return;
             }
 
@@ -188,7 +188,7 @@ namespace UI
             }
             else
             {
-                Debug.LogWarning($"[UI.UpdateSingle] {gameObject.name}: 未找到 DataBinder 组件");
+                Debug.LogWarning($"[UITools.UpdateSingle] {gameObject.name}: No DataBinder component found");
             }
         }
     }

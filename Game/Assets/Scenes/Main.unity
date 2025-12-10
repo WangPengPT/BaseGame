@@ -672,45 +672,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   uiroot: {fileID: 297931909}
---- !u!1 &1614175982 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8572156317040794311, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
-  m_PrefabInstance: {fileID: 7053739428733211346}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1614175983 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3647360567538518623, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
   m_PrefabInstance: {fileID: 7053739428733211346}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1614175986
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1614175982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e3bd3254939c8c42a55affc03110b6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
---- !u!114 &1614175987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1614175982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d69f785532a638c4eb199ee8218225df, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UI.DataBinder
-  dataTypeName: TestData
-  fieldName: name
-  customDisplayMethod: 
-  currentDataType: Datas.TestData
-  currentFieldType: 
 --- !u!1001 &7053739428733211346
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -799,6 +765,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4666947655989815530, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
+      propertyPath: fieldName
+      value: testValue
+      objectReference: {fileID: 0}
+    - target: {fileID: 4666947655989815530, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
+      propertyPath: dataTypeName
+      value: TestUI (Component)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4666947655989815530, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
+      propertyPath: currentDataType
+      value: TestUI
+      objectReference: {fileID: 0}
     - target: {fileID: 8572156317040794311, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
       propertyPath: m_Name
       value: TestUI
@@ -806,13 +784,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8572156317040794311, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1614175986}
-    - targetCorrespondingSourceObject: {fileID: 8572156317040794311, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1614175987}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 07487e2af4458ae41aad37a4a6d0f265, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

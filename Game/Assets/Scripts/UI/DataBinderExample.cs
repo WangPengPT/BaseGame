@@ -24,17 +24,17 @@ namespace UI.Examples
                 Exp = 0.75f
             };
 
-            // 更新 UI
-            UI.Update(uiPanel, playerData);
+            // Update UI
+            UITools.Update(uiPanel, playerData);
             */
         }
 
         private void Update()
         {
-            // 示例：按空格键更新 UI
+            // Example: Press space to update UI
             if (Input.GetKeyDown(KeyCode.Space) && uiPanel != null)
             {
-                // UI.Update(uiPanel, someData);
+                // UITools.Update(uiPanel, someData);
             }
         }
     }

@@ -9,27 +9,27 @@ using TMPro;
 namespace UI
 {
     /// <summary>
-    /// 数据绑定组件 - 在编辑器中选择数据类型、字段和显示方法
+    /// Data binding component - Select data type, field and display method in editor
     /// </summary>
     public class DataBinder : MonoBehaviour
     {
-        [Header("数据配置")]
-        [Tooltip("数据类型（Datas 命名空间下的类名）")]
+        [Header("Data Configuration")]
+        [Tooltip("Data type (class name in Datas namespace)")]
         public string dataTypeName = "";
 
-        [Tooltip("字段名")]
+        [Tooltip("Field name")]
         public string fieldName = "";
 
-        [Header("显示方法")]
-        [Tooltip("自定义显示方法名（可选，留空使用默认方法）")]
+        [Header("Display Method")]
+        [Tooltip("Custom display method name (optional, leave empty to use default method)")]
         public string customDisplayMethod = "";
 
-        [Header("调试信息")]
-        [Tooltip("当前绑定的数据类型")]
+        [Header("Debug Information")]
+        [Tooltip("Currently bound data type")]
         [SerializeField]
         public string currentDataType = "";
 
-        [Tooltip("当前绑定的字段类型")]
+        [Tooltip("Currently bound field type")]
         [SerializeField]
         public string currentFieldType = "";
 
@@ -52,13 +52,13 @@ namespace UI
                 return;
             }
 
-            // 查找 Datas 命名空间下的类型
+            // Find type in Datas namespace
             _dataType = FindTypeInDatasNamespace(dataTypeName);
             if (_dataType != null)
             {
                 currentDataType = _dataType.FullName;
 
-                // 查找字段或属性
+                // Find field or property
                 if (!string.IsNullOrEmpty(fieldName))
                 {
                     _fieldInfo = _dataType.GetField(fieldName, BindingFlags.Public | BindingFlags.Instance);
@@ -74,39 +74,59 @@ namespace UI
                     }
                     else
                     {
-                        currentFieldType = "未找到";
+                        currentFieldType = "Not Found";
                     }
                 }
             }
             else
             {
-                currentDataType = "类型未找到";
+                currentDataType = "Type Not Found";
             }
         }
 
         private Type FindTypeInDatasNamespace(string typeName)
         {
+            // Remove "(Component)" suffix if present
+            string cleanTypeName = typeName.Replace(" (Component)", "");
+            
+            // First try Datas namespace
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                Type type = assembly.GetType("Datas." + typeName);
+                Type type = assembly.GetType("Datas." + cleanTypeName);
                 if (type != null)
                     return type;
             }
+            
+            // Then try to find in all assemblies (for component types)
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    Type type = assembly.GetType(cleanTypeName);
+                    if (type != null)
+                        return type;
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+            
             return null;
         }
 
         /// <summary>
-        /// 更新显示（由 UI.Update 调用）
+        /// Update display (called by UITools.Update)
         /// </summary>
         public void UpdateDisplay(object data)
         {
             if (data == null)
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 数据为 null");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: Data is null");
                 return;
             }
 
-            // 检查数据类型是否匹配
+            // Check if data type matches
             if (_dataType == null)
             {
                 UpdateTypeInfo();
@@ -114,28 +134,28 @@ namespace UI
 
             if (_dataType == null || data.GetType() != _dataType)
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 数据类型不匹配。期望: {_dataType?.Name}, 实际: {data.GetType().Name}");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: Data type mismatch. Expected: {_dataType?.Name}, Actual: {data.GetType().Name}");
                 return;
             }
 
             _lastData = data;
 
-            // 获取字段值
+            // Get field value
             object fieldValue = GetFieldValue(data);
             if (fieldValue == null && !string.IsNullOrEmpty(fieldName))
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 无法获取字段 {fieldName} 的值");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: Cannot get value of field {fieldName}");
                 return;
             }
 
-            // 检查是否为 List 类型
+            // Check if it's a List type
             if (IsListType(fieldValue))
             {
                 UpdateListDisplay(fieldValue);
                 return;
             }
 
-            // 使用自定义方法或默认方法显示
+            // Use custom method or default method to display
             if (!string.IsNullOrEmpty(customDisplayMethod))
             {
                 UseCustomDisplayMethod(fieldValue);
@@ -172,7 +192,7 @@ namespace UI
             if (method != null)
             {
                 ParameterInfo[] parameters = method.GetParameters();
-                // 检查方法签名: (GameObject target, T value)
+                // Check method signature: (GameObject target, T value)
                 if (parameters.Length == 2 && 
                     parameters[0].ParameterType == typeof(GameObject) &&
                     (parameters[1].ParameterType.IsAssignableFrom(value?.GetType() ?? typeof(object)) ||
@@ -183,21 +203,21 @@ namespace UI
                 }
                 else
                 {
-                    Debug.LogWarning($"[DataBinder] {gameObject.name}: 自定义方法 {customDisplayMethod} 参数不匹配。期望: (GameObject, {value?.GetType().Name ?? "object"})");
+                    Debug.LogWarning($"[DataBinder] {gameObject.name}: Custom method {customDisplayMethod} parameter mismatch. Expected: (GameObject, {value?.GetType().Name ?? "object"})");
                 }
             }
             else
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 未找到自定义方法 {customDisplayMethod}，请确保方法在 UIFunctions 类中且为 public static");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: Custom method {customDisplayMethod} not found, please ensure method is in UIFunctions class and is public static");
             }
             
-            // 如果自定义方法调用失败，使用默认显示
+            // If custom method call fails, use default display
             UseDefaultDisplay(value);
         }
 
         private void UseDefaultDisplay(object value)
         {
-            // 根据 UI 组件类型自动决定显示方式
+            // Automatically determine display method based on UI component type
             if (TryUpdateText(value))
                 return;
             if (TryUpdateToggle(value))
@@ -209,12 +229,12 @@ namespace UI
             if (TryUpdateRawImage(value))
                 return;
 
-            Debug.LogWarning($"[DataBinder] {gameObject.name}: 未找到支持的 UI 组件");
+            Debug.LogWarning($"[DataBinder] {gameObject.name}: No supported UI component found");
         }
 
         private bool TryUpdateText(object value)
         {
-            // 尝试 Text 组件
+            // Try Text component
             Text text = GetComponent<Text>();
             if (text != null)
             {
@@ -317,7 +337,7 @@ namespace UI
         }
 
         /// <summary>
-        /// 检查值是否为 List 类型
+        /// Check if value is a List type
         /// </summary>
         private bool IsListType(object value)
         {
@@ -326,13 +346,13 @@ namespace UI
 
             Type valueType = value.GetType();
             
-            // 检查是否实现了 IList 接口（包括 List<T>, Array 等）
+            // Check if implements IList interface (including List<T>, Array, etc.)
             if (valueType.IsArray)
                 return true;
             
             if (typeof(IList).IsAssignableFrom(valueType))
             {
-                // 排除字符串（虽然实现了 IList，但应该作为普通文本显示）
+                // Exclude string (although it implements IList, it should be displayed as normal text)
                 if (valueType == typeof(string))
                     return false;
                 return true;
@@ -342,18 +362,18 @@ namespace UI
         }
 
         /// <summary>
-        /// 更新 List 类型数据的显示
+        /// Update display for List type data
         /// </summary>
         private void UpdateListDisplay(object listValue)
         {
             IList list = listValue as IList;
             if (list == null)
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: List 值为 null");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: List value is null");
                 return;
             }
 
-            // 获取子节点模板（第一个子节点作为模板）
+            // Get child node template (first child node as template)
             Transform templateChild = null;
             if (transform.childCount > 0)
             {
@@ -362,26 +382,26 @@ namespace UI
 
             if (templateChild == null)
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 没有子节点作为模板");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: No child node as template");
                 return;
             }
 
-            // 检查模板子节点是否有 DataBinder 组件（只检查直接子节点，不包括自己）
+            // Check if template child node has DataBinder component (only check direct child, not including self)
             DataBinder templateBinder = templateChild.GetComponent<DataBinder>();
             if (templateBinder == null)
             {
-                Debug.LogWarning($"[DataBinder] {gameObject.name}: 模板子节点 {templateChild.name} 没有 DataBinder 组件");
+                Debug.LogWarning($"[DataBinder] {gameObject.name}: Template child node {templateChild.name} has no DataBinder component");
                 return;
             }
 
-            // 确保有足够的子节点来显示所有 List 元素
+            // Ensure there are enough child nodes to display all List elements
             int listCount = list.Count;
             int currentChildCount = transform.childCount;
 
-            // 创建或删除子节点以匹配 List 数量
+            // Create or delete child nodes to match List count
             if (listCount > currentChildCount)
             {
-                // 需要创建更多子节点
+                // Need to create more child nodes
                 for (int i = currentChildCount; i < listCount; i++)
                 {
                     GameObject newChild = Instantiate(templateChild.gameObject, transform);
@@ -390,7 +410,7 @@ namespace UI
             }
             else if (listCount < currentChildCount)
             {
-                // 需要删除多余的子节点（保留模板）
+                // Need to delete excess child nodes (keep template)
                 for (int i = transform.childCount - 1; i >= listCount; i--)
                 {
                     Transform childToRemove = transform.GetChild(i);
@@ -408,16 +428,16 @@ namespace UI
                 }
             }
 
-            // 更新每个直接子节点的 DataBinder（只使用下一层节点）
+            // Update DataBinder for each direct child node (only use next level nodes)
             for (int i = 0; i < listCount; i++)
             {
                 Transform child = transform.GetChild(i);
                 object item = list[i];
 
-                UI.Update(child.gameObject, item);
+                UITools.Update(child.gameObject, item);
             }
 
-            // 隐藏或显示模板节点
+            // Hide or show template node
             if (listCount > 0)
             {
                 templateChild.gameObject.SetActive(true);

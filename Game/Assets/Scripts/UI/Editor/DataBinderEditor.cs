@@ -22,14 +22,14 @@ namespace UI.Editor
         {
             RefreshDataTypeNames();
             RefreshCustomMethodNames();
-            // 确保字段列表也被刷新
+            // Ensure field list is also refreshed
             DataBinder binder = (DataBinder)target;
             if (!string.IsNullOrEmpty(binder.dataTypeName))
             {
-                _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                _selectedDataType = FindType(binder.dataTypeName);
                 RefreshFieldNames();
             }
-            // 恢复自定义方法选择
+            // Restore custom method selection
             if (!string.IsNullOrEmpty(binder.customDisplayMethod))
             {
                 _selectedMethodIndex = Array.IndexOf(_customMethodNames, binder.customDisplayMethod);
@@ -43,21 +43,21 @@ namespace UI.Editor
             DataBinder binder = (DataBinder)target;
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("数据绑定配置", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Data Binding Configuration", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            // 数据类型选择
+            // Data type selection
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("数据类型:", GUILayout.Width(100));
+            EditorGUILayout.LabelField("Data Type:", GUILayout.Width(100));
             
-            // 确保索引同步
+            // Ensure index synchronization
             if (!string.IsNullOrEmpty(binder.dataTypeName) && _dataTypeNames != null && _dataTypeNames.Length > 0)
             {
                 int foundIndex = Array.IndexOf(_dataTypeNames, binder.dataTypeName);
                 if (foundIndex >= 0 && foundIndex != _selectedDataTypeIndex)
                 {
                     _selectedDataTypeIndex = foundIndex;
-                    _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                    _selectedDataType = FindType(binder.dataTypeName);
                     RefreshFieldNames();
                 }
             }
@@ -70,7 +70,7 @@ namespace UI.Editor
                     _selectedDataTypeIndex = newIndex;
                     string newTypeName = _dataTypeNames[newIndex];
                     
-                    // 使用 SerializedProperty 来确保值被正确保存
+                    // Use SerializedProperty to ensure value is saved correctly
                     SerializedProperty dataTypeNameProp = serializedObject.FindProperty("dataTypeName");
                     if (dataTypeNameProp != null)
                     {
@@ -81,7 +81,7 @@ namespace UI.Editor
                         binder.dataTypeName = newTypeName;
                     }
                     
-                    _selectedDataType = FindTypeInDatasNamespace(newTypeName);
+                    _selectedDataType = FindType(newTypeName);
                     RefreshFieldNames();
                     
                     serializedObject.ApplyModifiedProperties();
@@ -90,77 +90,78 @@ namespace UI.Editor
             }
             else
             {
-                EditorGUILayout.HelpBox("未找到 Datas 命名空间下的类型。请确保已导入 Excel 数据并生成对应的类。", MessageType.Warning);
+                EditorGUILayout.HelpBox("No types found in Datas namespace. Please ensure Excel data has been imported and corresponding classes generated.", MessageType.Warning);
             }
 
-            if (GUILayout.Button("刷新", GUILayout.Width(50)))
+            if (GUILayout.Button("Refresh", GUILayout.Width(50)))
             {
                 RefreshDataTypeNames();
                 if (!string.IsNullOrEmpty(binder.dataTypeName))
                 {
                     _selectedDataTypeIndex = Array.IndexOf(_dataTypeNames, binder.dataTypeName);
                     if (_selectedDataTypeIndex < 0) _selectedDataTypeIndex = 0;
-                    _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                    _selectedDataType = FindType(binder.dataTypeName);
                     RefreshFieldNames();
                 }
             }
             EditorGUILayout.EndHorizontal();
             
-            // 确保 _selectedDataType 始终是最新的
+            // Ensure _selectedDataType is always up to date
             if (!string.IsNullOrEmpty(binder.dataTypeName) && _selectedDataType == null)
             {
-                _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                _selectedDataType = FindType(binder.dataTypeName);
                 RefreshFieldNames();
             }
 
-            // 字段选择
+            // Field selection
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("字段名:", GUILayout.Width(100));
+            EditorGUILayout.LabelField("Field Name:", GUILayout.Width(100));
             
-            // 强制刷新字段列表（如果类型已选择）
+            // Force refresh field list if type is selected
             if (!string.IsNullOrEmpty(binder.dataTypeName))
             {
-                // 确保类型已加载
-                if (_selectedDataType == null || _selectedDataType.Name != binder.dataTypeName)
+                // Ensure type is loaded
+                string cleanTypeName = binder.dataTypeName.Replace(" (Component)", "");
+                if (_selectedDataType == null || _selectedDataType.Name != cleanTypeName)
                 {
-                    _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                    _selectedDataType = FindType(binder.dataTypeName);
                     if (_selectedDataType != null)
                     {
                         RefreshFieldNames();
                     }
                 }
                 
-                // 如果类型已加载，显示下拉选择
+                // If type is loaded, show dropdown selection
                 if (_selectedDataType != null)
                 {
-                    // 确保字段列表已刷新
+                    // Ensure field list is refreshed
                     if (_fieldNames == null || _fieldNames.Length == 0)
                     {
                         RefreshFieldNames();
                     }
                     
-                    // 总是显示下拉选择（即使字段列表为空，也显示"无字段"选项）
+                    // Always show dropdown selection (even if field list is empty, show "None" option)
                     string[] fieldNamesWithNone;
                     if (_fieldNames != null && _fieldNames.Length > 0)
                     {
                         fieldNamesWithNone = new string[_fieldNames.Length + 1];
-                        fieldNamesWithNone[0] = "(无 - 绑定整个对象)";
+                        fieldNamesWithNone[0] = "(None - Bind entire object)";
                         Array.Copy(_fieldNames, 0, fieldNamesWithNone, 1, _fieldNames.Length);
                     }
                     else
                     {
-                        // 如果没有字段，只显示"无"选项
-                        fieldNamesWithNone = new string[] { "(无 - 绑定整个对象)" };
+                        // If no fields, only show "None" option
+                        fieldNamesWithNone = new string[] { "(None - Bind entire object)" };
                     }
                     
-                    // 计算当前索引
+                    // Calculate current index
                     int currentIndex = 0;
                     if (!string.IsNullOrEmpty(binder.fieldName) && _fieldNames != null && _fieldNames.Length > 0)
                     {
                         int foundIndex = Array.IndexOf(_fieldNames, binder.fieldName);
                         if (foundIndex >= 0)
                         {
-                            currentIndex = foundIndex + 1; // +1 因为第一个是"无"
+                            currentIndex = foundIndex + 1; // +1 because first is "None"
                         }
                     }
                     
@@ -182,49 +183,49 @@ namespace UI.Editor
                     
                     if (_fieldNames == null || _fieldNames.Length == 0)
                     {
-                        EditorGUILayout.HelpBox($"类型 {binder.dataTypeName} 没有公共字段或属性", MessageType.Warning);
+                        EditorGUILayout.HelpBox($"Type {binder.dataTypeName} has no public fields or properties", MessageType.Warning);
                     }
                 }
                 else
                 {
-                    // 类型未找到，显示文本输入框
+                    // Type not found, show text input
                     binder.fieldName = EditorGUILayout.TextField(binder.fieldName);
-                    EditorGUILayout.HelpBox($"无法找到类型: {binder.dataTypeName}，请检查命名空间是否为 Datas", MessageType.Warning);
+                    EditorGUILayout.HelpBox($"Cannot find type: {binder.dataTypeName}. Please check if it's in Datas namespace or exists as a component.", MessageType.Warning);
                 }
             }
             else
             {
-                // 如果类型未选择，显示文本输入框
+                // If type is not selected, show text input
                 binder.fieldName = EditorGUILayout.TextField(binder.fieldName);
             }
             EditorGUILayout.EndHorizontal();
             
             if (!string.IsNullOrEmpty(binder.dataTypeName) && string.IsNullOrEmpty(binder.fieldName))
             {
-                EditorGUILayout.HelpBox("留空字段名将绑定整个数据对象", MessageType.Info);
+                EditorGUILayout.HelpBox("Empty field name will bind the entire data object", MessageType.Info);
             }
 
             EditorGUILayout.Space();
 
-            // 自定义显示方法选择
+            // Custom display method selection
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("自定义方法:", GUILayout.Width(100));
+            EditorGUILayout.LabelField("Custom Method:", GUILayout.Width(100));
             
             if (_customMethodNames != null && _customMethodNames.Length > 0)
             {
-                // 添加"无 - 使用默认显示"选项
+                // Add "None - Use default display" option
                 string[] methodNamesWithNone = new string[_customMethodNames.Length + 1];
-                methodNamesWithNone[0] = "(无 - 使用默认显示)";
+                methodNamesWithNone[0] = "(None - Use default display)";
                 Array.Copy(_customMethodNames, 0, methodNamesWithNone, 1, _customMethodNames.Length);
                 
-                // 计算当前索引
+                // Calculate current index
                 int currentMethodIndex = 0;
                 if (!string.IsNullOrEmpty(binder.customDisplayMethod))
                 {
                     int foundIndex = Array.IndexOf(_customMethodNames, binder.customDisplayMethod);
                     if (foundIndex >= 0)
                     {
-                        currentMethodIndex = foundIndex + 1; // +1 因为第一个是"无"
+                        currentMethodIndex = foundIndex + 1; // +1 because first is "None"
                     }
                 }
                 
@@ -246,11 +247,11 @@ namespace UI.Editor
             }
             else
             {
-                // 如果没有自定义方法，显示文本输入框
+                // If no custom methods, show text input
                 binder.customDisplayMethod = EditorGUILayout.TextField(binder.customDisplayMethod);
             }
             
-            if (GUILayout.Button("刷新", GUILayout.Width(50)))
+            if (GUILayout.Button("Refresh", GUILayout.Width(50)))
             {
                 RefreshCustomMethodNames();
             }
@@ -258,28 +259,28 @@ namespace UI.Editor
 
             if (string.IsNullOrEmpty(binder.customDisplayMethod))
             {
-                EditorGUILayout.HelpBox("使用默认显示方法（根据 UI 组件类型自动决定）", MessageType.Info);
+                EditorGUILayout.HelpBox("Using default display method (automatically determined by UI component type)", MessageType.Info);
             }
             else
             {
-                EditorGUILayout.HelpBox($"将使用 UIFunctions.{binder.customDisplayMethod} 方法显示", MessageType.Info);
+                EditorGUILayout.HelpBox($"Will use UIFunctions.{binder.customDisplayMethod} method to display", MessageType.Info);
             }
 
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("支持的 UI 组件:", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("• Text / TextMeshProUGUI: 显示为字符串");
-            EditorGUILayout.LabelField("• Toggle: bool 值控制开关");
-            EditorGUILayout.LabelField("• Slider: float/int 值控制进度");
-            EditorGUILayout.LabelField("• Image: Sprite/Texture2D");
-            EditorGUILayout.LabelField("• RawImage: Texture");
+            //EditorGUILayout.Space();
+            //EditorGUILayout.LabelField("支持的 UI 组件:", EditorStyles.boldLabel);
+            //EditorGUILayout.LabelField("• Text / TextMeshProUGUI: 显示为字符串");
+            //EditorGUILayout.LabelField("• Toggle: bool 值控制开关");
+            //EditorGUILayout.LabelField("• Slider: float/int 值控制进度");
+            //EditorGUILayout.LabelField("• Image: Sprite/Texture2D");
+            //EditorGUILayout.LabelField("• RawImage: Texture");
 
             EditorGUILayout.Space();
 
-            // 显示调试信息
-            EditorGUILayout.LabelField("调试信息", EditorStyles.boldLabel);
+            // Debug information
+            EditorGUILayout.LabelField("Debug Information", EditorStyles.boldLabel);
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.TextField("数据类型:", binder.currentDataType);
-            EditorGUILayout.TextField("字段类型:", binder.currentFieldType);
+            EditorGUILayout.TextField("Data Type:", binder.currentDataType);
+            EditorGUILayout.TextField("Field Type:", binder.currentFieldType);
             EditorGUI.EndDisabledGroup();
 
             serializedObject.ApplyModifiedProperties();
@@ -293,7 +294,9 @@ namespace UI.Editor
         private void RefreshDataTypeNames()
         {
             List<string> typeNames = new List<string>();
+            HashSet<string> typeNameSet = new HashSet<string>();
             
+            // Get types from Datas namespace
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -303,30 +306,112 @@ namespace UI.Editor
                     {
                         if (type.Namespace == "Datas" && !type.IsAbstract && !type.IsInterface)
                         {
-                            // 排除 Row 类，只显示主数据类
+                            // Exclude Row classes, only show main data classes
                             if (!type.Name.EndsWith("Row"))
                             {
-                                typeNames.Add(type.Name);
+                                if (!typeNameSet.Contains(type.Name))
+                                {
+                                    typeNames.Add(type.Name);
+                                    typeNameSet.Add(type.Name);
+                                }
                             }
                         }
                     }
                 }
                 catch
                 {
-                    // 忽略无法加载的程序集
+                    // Ignore assemblies that cannot be loaded
+                }
+            }
+
+            // Get component types from current GameObject and parent GameObjects
+            // Rule: Only include types that inherit from UIBase or have no namespace
+            DataBinder binder = (DataBinder)target;
+            if (binder != null && binder.gameObject != null)
+            {
+                HashSet<Type> componentTypes = new HashSet<Type>();
+                Type uiBaseType = typeof(UIBase);
+                
+                // Collect all GameObjects to check: current node and all parent nodes
+                List<GameObject> gameObjectsToCheck = new List<GameObject>();
+                gameObjectsToCheck.Add(binder.gameObject);
+                
+                Transform parent = binder.transform.parent;
+                while (parent != null)
+                {
+                    gameObjectsToCheck.Add(parent.gameObject);
+                    parent = parent.parent;
+                }
+                
+                // Check all components on current and parent GameObjects
+                foreach (GameObject go in gameObjectsToCheck)
+                {
+                    Component[] components = go.GetComponents<Component>();
+                    foreach (Component comp in components)
+                    {
+                        if (comp == null || comp.GetType() == typeof(Transform) || comp.GetType() == typeof(DataBinder))
+                            continue;
+                        
+                        Type compType = comp.GetType();
+                        
+                        // Check if inherits from UIBase
+                        if (uiBaseType.IsAssignableFrom(compType) && compType != uiBaseType)
+                        {
+                            componentTypes.Add(compType);
+                        }
+                        // Check if has no namespace
+                        else if (string.IsNullOrEmpty(compType.Namespace))
+                        {
+                            // Exclude Unity and System types
+                            if (!compType.FullName.StartsWith("UnityEngine.") && 
+                                !compType.FullName.StartsWith("System.") &&
+                                !compType.FullName.StartsWith("Unity."))
+                            {
+                                componentTypes.Add(compType);
+                            }
+                        }
+                    }
+                }
+                
+                // Add component types to list
+                foreach (Type compType in componentTypes)
+                {
+                    string typeName = compType.Name;
+                    if (!typeNameSet.Contains(typeName))
+                    {
+                        typeNames.Add($"{typeName} (Component)");
+                        typeNameSet.Add(typeName);
+                    }
                 }
             }
 
             typeNames.Sort();
             _dataTypeNames = typeNames.ToArray();
 
-            // 恢复当前选择
-            DataBinder binder = (DataBinder)target;
+            // Restore current selection
             if (!string.IsNullOrEmpty(binder.dataTypeName))
             {
+                // Try to find exact match first
                 _selectedDataTypeIndex = Array.IndexOf(_dataTypeNames, binder.dataTypeName);
+                
+                // If not found, try to find without "(Component)" suffix
+                if (_selectedDataTypeIndex < 0)
+                {
+                    for (int i = 0; i < _dataTypeNames.Length; i++)
+                    {
+                        string name = _dataTypeNames[i];
+                        if (name == binder.dataTypeName || name.StartsWith(binder.dataTypeName + " "))
+                        {
+                            _selectedDataTypeIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
                 if (_selectedDataTypeIndex < 0) _selectedDataTypeIndex = 0;
-                _selectedDataType = FindTypeInDatasNamespace(binder.dataTypeName);
+                
+                // Try to find the type
+                _selectedDataType = FindType(binder.dataTypeName);
                 RefreshFieldNames();
             }
         }
@@ -334,23 +419,52 @@ namespace UI.Editor
         private void RefreshFieldNames()
         {
             List<string> fieldNames = new List<string>();
-            
+            DataBinder binder;
+
             if (_selectedDataType != null)
             {
-                // 获取所有公共字段
-                FieldInfo[] fields = _selectedDataType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+                // Check if it's a component type (has "(Component)" suffix in the name)
+                binder = (DataBinder)target;
+                bool isComponentType = !string.IsNullOrEmpty(binder.dataTypeName) && binder.dataTypeName.Contains(" (Component)");
+                
+                // Get all public fields
+                FieldInfo[] fields = _selectedDataType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 foreach (FieldInfo field in fields)
                 {
-                    fieldNames.Add(field.Name);
+                    // If it's a component type, only show fields declared in this class
+                    if (isComponentType)
+                    {
+                        if (field.DeclaringType == _selectedDataType)
+                        {
+                            fieldNames.Add(field.Name);
+                        }
+                    }
+                    else
+                    {
+                        // For Datas namespace types, show all fields
+                        fieldNames.Add(field.Name);
+                    }
                 }
 
-                // 获取所有公共属性
-                PropertyInfo[] properties = _selectedDataType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                // Get all public properties
+                PropertyInfo[] properties = _selectedDataType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 foreach (PropertyInfo property in properties)
                 {
                     if (property.CanRead)
                     {
-                        fieldNames.Add(property.Name);
+                        // If it's a component type, only show properties declared in this class
+                        if (isComponentType)
+                        {
+                            if (property.DeclaringType == _selectedDataType)
+                            {
+                                fieldNames.Add(property.Name);
+                            }
+                        }
+                        else
+                        {
+                            // For Datas namespace types, show all properties
+                            fieldNames.Add(property.Name);
+                        }
                     }
                 }
             }
@@ -358,8 +472,8 @@ namespace UI.Editor
             fieldNames.Sort();
             _fieldNames = fieldNames.ToArray();
 
-            // 恢复当前选择
-            DataBinder binder = (DataBinder)target;
+            // Restore current selection
+            binder = (DataBinder)target;
             if (!string.IsNullOrEmpty(binder.fieldName))
             {
                 _selectedFieldIndex = Array.IndexOf(_fieldNames, binder.fieldName);
@@ -382,6 +496,48 @@ namespace UI.Editor
             return null;
         }
 
+        private Type FindType(string typeName)
+        {
+            if (string.IsNullOrEmpty(typeName))
+                return null;
+            
+            // Remove "(Component)" suffix if present
+            string cleanTypeName = typeName.Replace(" (Component)", "");
+            
+            // First try Datas namespace
+            Type type = FindTypeInDatasNamespace(cleanTypeName);
+            if (type != null)
+                return type;
+            
+            // Then try to find in all assemblies (for component types)
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    // Try with full namespace first
+                    type = assembly.GetType(cleanTypeName);
+                    if (type != null)
+                        return type;
+                    
+                    // Try without namespace (just class name)
+                    Type[] types = assembly.GetTypes();
+                    foreach (Type t in types)
+                    {
+                        if (t.Name == cleanTypeName && !t.IsAbstract && !t.IsInterface)
+                        {
+                            return t;
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+            
+            return null;
+        }
+
         private void RefreshCustomMethodNames()
         {
             List<string> methodNames = new List<string>();
@@ -389,11 +545,11 @@ namespace UI.Editor
             Type uiFunctionsType = typeof(UIFunctions);
             if (uiFunctionsType != null)
             {
-                // 获取所有公共静态方法
+                // Get all public static methods
                 MethodInfo[] methods = uiFunctionsType.GetMethods(BindingFlags.Public | BindingFlags.Static);
                 foreach (MethodInfo method in methods)
                 {
-                    // 检查方法签名: public static void MethodName(GameObject, T)
+                    // Check method signature: public static void MethodName(GameObject, T)
                     ParameterInfo[] parameters = method.GetParameters();
                     if (parameters.Length == 2 && parameters[0].ParameterType == typeof(GameObject))
                     {
@@ -405,7 +561,7 @@ namespace UI.Editor
             methodNames.Sort();
             _customMethodNames = methodNames.ToArray();
 
-            // 恢复当前选择
+            // Restore current selection
             DataBinder binder = (DataBinder)target;
             if (!string.IsNullOrEmpty(binder.customDisplayMethod))
             {
