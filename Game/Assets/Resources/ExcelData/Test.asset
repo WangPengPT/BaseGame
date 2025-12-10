@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0231047803fa0214f9178aad092c839e, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: Assembly-CSharp::ExcelData.Test
+  rows:
+  - Id: 1
+    Name: "\u5F20\u4E09"
+    Age: 25
+    Score: 95.5
+    Isactive: 1
+  - Id: 2
+    Name: "\u674E\u56DB"
+    Age: 30
+    Score: 88
+    Isactive: 0
+  - Id: 3
+    Name: "\u738B\u4E94"
+    Age: 28
+    Score: 92.3
+    Isactive: 1
+  - Id: 4
+    Name: "\u8D75\u516D"
+    Age: 35
+    Score: 87.5
+    Isactive: 1
