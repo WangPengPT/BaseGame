@@ -20,6 +20,15 @@ namespace ExcelImporter
         }
 
         /// <summary>
+        /// 初始化并开启懒加载模式（按需加载），减少启动开销。
+        /// </summary>
+        public static void InitializeLazy()
+        {
+            ExcelDataManager.EnableLazyLoad(true);
+            _tables = ExcelDataManager.GetAllTables();
+        }
+
+        /// <summary>
         /// 获取所有已加载的表
         /// </summary>
         public static Dictionary<string, IExcelDataTable> GetAllTables()

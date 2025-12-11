@@ -31,7 +31,7 @@ namespace ExcelData
         /// <summary>
         /// 根据 Id 查找数据行
         /// </summary>
-        public TestRow GetRowById(int id)
+        public TestRow GetById(int id)
         {
             return rows.FirstOrDefault(r => r.Id == id);
         }

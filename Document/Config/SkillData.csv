@@ -1,0 +1,7 @@
+id,name,element,damage_type,shape,base_value,crit_bonus,mana_cost,cooldown,pre_cast,cast_lock,post_cast,radius,angle,chain_count,knockback_force,ignite_bonus,slow_amount,notes
+101,Frost Spear,ice,magical,projectile,60,0.05,20,4,0.3,0.1,0.2,0,0,0,0,0,0.1,"Single target, applies slow"
+102,Fireball,fire,magical,projectile,70,0.05,25,4,0.25,0.15,0.2,1.5,0,0,0,0.2,0,"Small AoE burn"
+103,Chain Lightning,lightning,magical,chain,55,0.25,22,5,0.2,0.15,0.2,0,0,4,0,0,0,"High crit, chains"
+104,Corrosive Bolt,poison,magical,projectile,50,0.05,18,4,0.2,0.1,0.2,0,0,0,0,0,0,"Shreds resist"
+105,Slash,none,physical,cone,45,0.1,0,3,0.15,0.1,0.2,1.5,90,0,0.5,0,0,"Melee cone hit"
+

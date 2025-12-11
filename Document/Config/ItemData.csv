@@ -1,0 +1,4 @@
+id,name,slot,rarity,required_level,base_stat,allowed_affix_pool_ids,legendary_id,set_id
+1001,Frostfang Blade,weapon,rare,8,offense,"1;2",0,0
+1002,Ember Scepter,weapon,rare,8,offense,"3;2",0,0
+

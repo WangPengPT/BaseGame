@@ -28,6 +28,7 @@ namespace ExcelImporter
         private Dictionary<string, IExcelDataTable> _loadedTables = new Dictionary<string, IExcelDataTable>();
         private bool _allTablesLoaded = false;
         private string _resourcesPath = "ExcelData";
+        private bool _lazyMode = false;
 
         /// <summary>
         /// 设置资源路径（相对于 Resources 文件夹）
@@ -43,6 +44,14 @@ namespace ExcelImporter
         public static void LoadAllTables()
         {
             Instance.LoadAllTablesInternal();
+        }
+
+        /// <summary>
+        /// 启用懒加载模式：按需加载表，避免一次性 LoadAll。
+        /// </summary>
+        public static void EnableLazyLoad(bool enabled)
+        {
+            Instance._lazyMode = enabled;
         }
 
         /// <summary>
@@ -64,7 +73,14 @@ namespace ExcelImporter
         {
             if (!Instance._allTablesLoaded)
             {
-                LoadAllTables();
+                if (Instance._lazyMode)
+                {
+                    Instance.EnsureTableLoaded(tableName);
+                }
+                else
+                {
+                    LoadAllTables();
+                }
             }
 
             if (Instance._loadedTables.TryGetValue(tableName, out IExcelDataTable table))
@@ -92,7 +108,14 @@ namespace ExcelImporter
         {
             if (!Instance._allTablesLoaded)
             {
-                LoadAllTables();
+                if (Instance._lazyMode)
+                {
+                    Instance.EnsureTableLoaded(tableName);
+                }
+                else
+                {
+                    LoadAllTables();
+                }
             }
 
             if (Instance._loadedTables.TryGetValue(tableName, out IExcelDataTable table))
@@ -174,6 +197,30 @@ namespace ExcelImporter
 
             _allTablesLoaded = true;
             Debug.Log($"所有表加载完成，共 {_loadedTables.Count} 个表");
+        }
+
+        private void EnsureTableLoaded(string tableName)
+        {
+            if (_loadedTables.ContainsKey(tableName)) return;
+
+            var asset = Resources.Load<ScriptableObject>($"{_resourcesPath}/{tableName}");
+            if (asset is IExcelDataTable table)
+            {
+                _loadedTables[tableName] = table;
+                _loadedAssets[tableName] = asset;
+                return;
+            }
+
+            // fallback: try one scan to pick up missing
+            ScriptableObject[] allAssets = Resources.LoadAll<ScriptableObject>(_resourcesPath);
+            foreach (ScriptableObject a in allAssets)
+            {
+                if (a is IExcelDataTable t && !_loadedTables.ContainsKey(t.TableName))
+                {
+                    _loadedTables[t.TableName] = t;
+                    _loadedAssets[t.TableName] = a;
+                }
+            }
         }
 
         private void Awake()

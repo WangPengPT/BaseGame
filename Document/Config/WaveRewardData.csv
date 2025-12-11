@@ -1,0 +1,7 @@
+id,reward_table_id,rarity_bias,gold_min,gold_max,material_pool,consumable_pool,item_pool_id,score_to_loot_scalar
+1,reward_1,0.0,50,100,,,item_pool_1,1.0
+2,reward_2,0.05,80,150,,,item_pool_2,1.0
+3,reward_3,0.1,120,200,,,item_pool_3,1.0
+4,boss_reward_1,0.2,300,500,,,boss_pool_1,1.2
+5,reward_5,0.15,150,250,,,item_pool_5,1.0
+

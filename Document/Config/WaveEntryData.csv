@@ -1,0 +1,15 @@
+id,wave_id,enemy_id,count,spawn_pattern,spawn_delay,is_elite,affix_tags
+1,1,201,3,circle,0.0,False,
+2,1,202,2,circle,1.0,False,
+3,2,205,2,circle,0.0,False,
+4,2,206,2,circle,1.5,False,
+5,2,203,1,circle,3.0,False,
+6,3,209,1,circle,0.0,False,
+7,3,213,3,arc,2.0,False,
+8,3,214,2,arc,3.5,False,
+9,4,225,1,center,0.0,True,
+10,4,221,2,circle,2.0,True,
+11,5,217,2,circle,0.0,False,
+12,5,218,2,circle,1.0,False,
+13,5,219,1,circle,2.5,False
+

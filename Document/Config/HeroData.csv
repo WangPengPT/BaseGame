@@ -1,0 +1,4 @@
+id,name,role,primary_element,base_hp,base_mp,armor,physical_resist,magical_resist,ice_resist,fire_resist,lightning_resist,poison_resist,crit_chance,crit_multiplier,dodge,attack_speed,base_skills,ai_behavior_id,resist_profile_id
+1,Glacier Sentinel,tank,ice,520,120,12,0.1,0.05,0.25,0.05,0.05,0.05,0.05,2.0,0.03,1.0,"101;105",1,2
+2,Blaze Warden,tank,fire,500,140,10,0.1,0.05,0.05,0.25,0.05,0.05,0.05,2.0,0.03,1.0,"102;105",1,3
+

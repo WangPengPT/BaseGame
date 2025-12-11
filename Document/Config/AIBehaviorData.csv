@@ -1,0 +1,4 @@
+id,name,target_priority,kite_distance,engage_range,retreat_threshold_hp,ability_priority,mana_reserve_pct
+1,Tank Default,nearest,0,3.5,0.25,"heavy>basic",0.05
+2,Ranged Focus,nearest,4.0,6.0,0.20,"basic>aoe",0.10
+

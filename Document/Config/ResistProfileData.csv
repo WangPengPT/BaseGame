@@ -1,0 +1,7 @@
+id,ice_resist,fire_resist,lightning_resist,poison_resist,immunity_flags
+1,0.10,0.10,0.10,0.10,none
+2,0.30,0.05,0.05,0.05,ice
+3,0.05,0.30,0.05,0.05,fire
+4,0.05,0.05,0.30,0.05,lightning
+5,0.05,0.05,0.05,0.30,poison
+

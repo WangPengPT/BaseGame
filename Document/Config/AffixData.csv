@@ -1,0 +1,5 @@
+id,name,category,element_tag,min_value,max_value,roll_type,target,max_rolls_per_item,tags
+1,Ice Skill Damage,offense,ice,5,15,percent,skill_element,2,freeze_duration
+2,Crit Damage,offense,none,10,25,percent,crit_damage,2,
+3,Fire Over Time,offense,fire,4,10,percent,burn_dps,2,burn_stack
+

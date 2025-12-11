@@ -1,0 +1,3 @@
+id,name,slot,unique_effect_description,effect_hook,values,downside
+2001,Storm Lattice,ring,"Chain Lightning +1 jump, +5% crit","on_chain_hit","{extra_jumps:1,crit_bonus:0.05}","Lightning resist -5%"
+

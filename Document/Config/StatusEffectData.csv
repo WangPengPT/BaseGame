@@ -1,0 +1,6 @@
+id,name,type,max_stack,value,duration,tick_interval,notes
+1,Slow,slow,10,0.05,4,0,"Ice slow per hit, stacks"
+2,Ignite,ignite,10,0.1,6,1,"Fire bonus stack for next hits or DoT"
+3,Corrode,corrode,5,0.08,6,1,"Resist shred"
+4,ChainMark,chainmark,1,0,4,0,"Helper for lightning effects"
+

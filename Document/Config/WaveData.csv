@@ -1,0 +1,7 @@
+id,name,wave_index,is_boss_wave,difficulty_scalar,prep_time,auto_start,early_start_bonus,reward_table_id
+1,Wave 1,1,False,1.0,5.0,True,0.1,reward_1
+2,Wave 2,2,False,1.2,5.0,True,0.1,reward_2
+3,Wave 3,3,False,1.4,5.0,True,0.1,reward_3
+4,Boss Wave,4,True,2.0,8.0,False,0.15,boss_reward_1
+5,Wave 5,5,False,1.6,5.0,True,0.1,reward_5
+
