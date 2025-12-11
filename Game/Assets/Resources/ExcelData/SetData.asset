@@ -9,7 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0279842d5e3b8204da3cc6f289120c40, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: SetData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.SetData
-  rows: []
+  rows:
+    m_Size: 1
+    - m_Item_0:
+        SetId: 1
+        Name: "Frozen Judgment"
+        PieceIds: 1001

@@ -9,7 +9,108 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f262f1824c05627479c281f655d0f453, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: SkillData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.SkillData
-  rows: []
+  rows:
+    m_Size: 5
+    - m_Item_0:
+        Id: 101
+        Name: "Frost Spear"
+        Element: "ice"
+        DamageType: "magical"
+        Shape: "projectile"
+        BaseValue: 60
+        CritBonus: 0.05
+        ManaCost: 20
+        Cooldown: 4
+        PreCast: 0.3
+        CastLock: 0.1
+        PostCast: 0.2
+        Radius: 0
+        Angle: 0
+        ChainCount: 0
+        KnockbackForce: 0
+        IgniteBonus: 0
+        SlowAmount: 0.1
+        Notes: "Single target, applies slow"
+    - m_Item_1:
+        Id: 102
+        Name: "Fireball"
+        Element: "fire"
+        DamageType: "magical"
+        Shape: "projectile"
+        BaseValue: 70
+        CritBonus: 0.05
+        ManaCost: 25
+        Cooldown: 4
+        PreCast: 0.25
+        CastLock: 0.15
+        PostCast: 0.2
+        Radius: 1.5
+        Angle: 0
+        ChainCount: 0
+        KnockbackForce: 0
+        IgniteBonus: 0.2
+        SlowAmount: 0
+        Notes: "Small AoE burn"
+    - m_Item_2:
+        Id: 103
+        Name: "Chain Lightning"
+        Element: "lightning"
+        DamageType: "magical"
+        Shape: "chain"
+        BaseValue: 55
+        CritBonus: 0.25
+        ManaCost: 22
+        Cooldown: 5
+        PreCast: 0.2
+        CastLock: 0.15
+        PostCast: 0.2
+        Radius: 0
+        Angle: 0
+        ChainCount: 4
+        KnockbackForce: 0
+        IgniteBonus: 0
+        SlowAmount: 0
+        Notes: "High crit, chains"
+    - m_Item_3:
+        Id: 104
+        Name: "Corrosive Bolt"
+        Element: "poison"
+        DamageType: "magical"
+        Shape: "projectile"
+        BaseValue: 50
+        CritBonus: 0.05
+        ManaCost: 18
+        Cooldown: 4
+        PreCast: 0.2
+        CastLock: 0.1
+        PostCast: 0.2
+        Radius: 0
+        Angle: 0
+        ChainCount: 0
+        KnockbackForce: 0
+        IgniteBonus: 0
+        SlowAmount: 0
+        Notes: "Shreds resist"
+    - m_Item_4:
+        Id: 105
+        Name: "Slash"
+        Element: "none"
+        DamageType: "physical"
+        Shape: "cone"
+        BaseValue: 45
+        CritBonus: 0.1
+        ManaCost: 0
+        Cooldown: 3
+        PreCast: 0.15
+        CastLock: 0.1
+        PostCast: 0.2
+        Radius: 1.5
+        Angle: 90
+        ChainCount: 0
+        KnockbackForce: 0.5
+        IgniteBonus: 0
+        SlowAmount: 0
+        Notes: "Melee cone hit"

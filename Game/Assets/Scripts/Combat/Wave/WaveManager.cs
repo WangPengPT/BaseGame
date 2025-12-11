@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Game.Combat;
-using Game.Combat.Data;
 using ExcelImporter;
 using ExcelData;
 using UnityEngine;
@@ -167,16 +166,16 @@ namespace Game.Combat.Wave
             if (actor != null)
             {
                 // Apply difficulty scaling
-                actor.Stats.MaxHp = enemyData.Base_Hp * difficultyScalar;
+                actor.Stats.MaxHp = enemyData.BaseHp * difficultyScalar;
                 actor.Stats.Hp = actor.Stats.MaxHp;
-                actor.Stats.MaxMp = enemyData.Base_Mp;
+                actor.Stats.MaxMp = enemyData.BaseMp;
                 actor.Stats.Mp = actor.Stats.MaxMp;
-                actor.Stats.Armor = enemyData.Armor;
+                actor.Stats.Armor = enemyData.Armor ? 1f : 0f; // Convert bool to float
 
                 // Apply resistances
-                if (enemyData.Resist_Profile_Id > 0)
+                if (enemyData.ResistProfileId > 0)
                 {
-                    var resistProfile = GetResistProfile(enemyData.Resist_Profile_Id);
+                    var resistProfile = GetResistProfile(enemyData.ResistProfileId);
                     if (resistProfile != null)
                     {
                         actor.Stats.Resist.IceResist = resistProfile.IceResist;
@@ -188,12 +187,12 @@ namespace Game.Combat.Wave
                 else
                 {
                     // Apply direct resistances from enemy data if no profile
-                    actor.Stats.Resist.PhysicalResist = enemyData.Physical_Resist;
-                    actor.Stats.Resist.MagicalResist = enemyData.Magical_Resist;
-                    actor.Stats.Resist.IceResist = enemyData.Ice_Resist;
-                    actor.Stats.Resist.FireResist = enemyData.Fire_Resist;
-                    actor.Stats.Resist.LightningResist = enemyData.Lightning_Resist;
-                    actor.Stats.Resist.PoisonResist = enemyData.Poison_Resist;
+                    actor.Stats.Resist.PhysicalResist = enemyData.PhysicalResist;
+                    actor.Stats.Resist.MagicalResist = enemyData.MagicalResist;
+                    actor.Stats.Resist.IceResist = enemyData.IceResist;
+                    actor.Stats.Resist.FireResist = enemyData.FireResist;
+                    actor.Stats.Resist.LightningResist = enemyData.LightningResist;
+                    actor.Stats.Resist.PoisonResist = enemyData.PoisonResist;
                 }
 
                 // Elite bonus
@@ -209,15 +208,14 @@ namespace Game.Combat.Wave
 
             // Setup AI if available
             var ai = enemyObj.GetComponent<AI.CombatAIController>();
-            if (ai != null && enemyData.Base_Skills != null)
+            if (ai != null && enemyData.BaseSkills > 0)
             {
-                // Load abilities from CSV
-                var abilityIds = ParseSkillIds(enemyData.Base_Skills);
-                ai.Abilities.Clear();
-                foreach (var abId in abilityIds)
+                // BaseSkills is int in EnemyData - treat as single skill ID
+                var config = GetAbilityConfig(enemyData.BaseSkills);
+                if (config != null)
                 {
-                    var config = GetAbilityConfig(abId);
-                    if (config != null) ai.Abilities.Add(config);
+                    ai.Abilities.Clear();
+                    ai.Abilities.Add(config);
                 }
             }
         }
@@ -248,20 +246,7 @@ namespace Game.Combat.Wave
 
         private AbilityConfig GetAbilityConfig(int abilityId)
         {
-            var configs = CombatDataRegistry.GetAbilityConfigs();
-            // Try string ID matching
-            var config = configs.FirstOrDefault(c => c.Id == abilityId.ToString());
-            if (config == null)
-            {
-                // Fallback: try to get from AbilityData table directly
-                var abilityTable = ExcelDataLoader.GetTable<AbilityData>();
-                var abilityRow = abilityTable?.GetById(abilityId.ToString());
-                if (abilityRow != null)
-                {
-                    config = CombatDataRegistry.ToConfig(abilityRow);
-                }
-            }
-            return config;
+            return CombatDataRegistry.GetAbilityConfig(abilityId);
         }
 
         private List<int> ParseSkillIds(string skillString)
@@ -269,7 +254,9 @@ namespace Game.Combat.Wave
             var ids = new List<int>();
             if (string.IsNullOrEmpty(skillString)) return ids;
 
-            var parts = skillString.Split(';');
+            // Support both semicolon and comma separated values
+            var separators = new char[] { ';', ',' };
+            var parts = skillString.Split(separators, System.StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in parts)
             {
                 if (int.TryParse(p.Trim(), out var id))

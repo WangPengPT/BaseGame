@@ -9,7 +9,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2239c15133cf83345ae32c52070dea63, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: ItemData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.ItemData
-  rows: []
+  rows:
+    m_Size: 2
+    - m_Item_0:
+        Id: 1001
+        Name: "Frostfang Blade"
+        Slot: "weapon"
+        Rarity: "rare"
+        RequiredLevel: 8
+        BaseStat: "offense"
+        AllowedAffixPoolIds: "1;2"
+        LegendaryId: 0
+        SetId: 0
+    - m_Item_1:
+        Id: 1002
+        Name: "Ember Scepter"
+        Slot: "weapon"
+        Rarity: "rare"
+        RequiredLevel: 8
+        BaseStat: "offense"
+        AllowedAffixPoolIds: "3;2"
+        LegendaryId: 0
+        SetId: 0

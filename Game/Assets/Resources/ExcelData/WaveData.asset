@@ -9,7 +9,58 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65d10eca9a2494848932f43239a2bbd0, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: WaveData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.WaveData
-  rows: []
+  rows:
+    m_Size: 5
+    - m_Item_0:
+        Id: 1
+        Name: "Wave 1"
+        WaveIndex: 1
+        IsBossWave: 0
+        DifficultyScalar: 1.0
+        PrepTime: 5.0
+        AutoStart: 1
+        EarlyStartBonus: 0.1
+        RewardTableId: "reward_1"
+    - m_Item_1:
+        Id: 2
+        Name: "Wave 2"
+        WaveIndex: 2
+        IsBossWave: 0
+        DifficultyScalar: 1.2
+        PrepTime: 5.0
+        AutoStart: 1
+        EarlyStartBonus: 0.1
+        RewardTableId: "reward_2"
+    - m_Item_2:
+        Id: 3
+        Name: "Wave 3"
+        WaveIndex: 3
+        IsBossWave: 0
+        DifficultyScalar: 1.4
+        PrepTime: 5.0
+        AutoStart: 1
+        EarlyStartBonus: 0.1
+        RewardTableId: "reward_3"
+    - m_Item_3:
+        Id: 4
+        Name: "Boss Wave"
+        WaveIndex: 4
+        IsBossWave: 1
+        DifficultyScalar: 2.0
+        PrepTime: 8.0
+        AutoStart: 0
+        EarlyStartBonus: 0.15
+        RewardTableId: "boss_reward_1"
+    - m_Item_4:
+        Id: 5
+        Name: "Wave 5"
+        WaveIndex: 5
+        IsBossWave: 0
+        DifficultyScalar: 1.6
+        PrepTime: 5.0
+        AutoStart: 1
+        EarlyStartBonus: 0.1
+        RewardTableId: "reward_5"

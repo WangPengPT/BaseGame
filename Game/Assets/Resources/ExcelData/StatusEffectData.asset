@@ -9,7 +9,44 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d20cda311bb364643b2f2e83c35efa84, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: StatusEffectData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.StatusEffectData
-  rows: []
+  rows:
+    m_Size: 4
+    - m_Item_0:
+        Id: 1
+        Name: "Slow"
+        Type: "slow"
+        MaxStack: 10
+        Value: 0.05
+        Duration: 4
+        TickInterval: 0
+        Notes: "Ice slow per hit, stacks"
+    - m_Item_1:
+        Id: 2
+        Name: "Ignite"
+        Type: "ignite"
+        MaxStack: 10
+        Value: 0.1
+        Duration: 6
+        TickInterval: 1
+        Notes: "Fire bonus stack for next hits or DoT"
+    - m_Item_2:
+        Id: 3
+        Name: "Corrode"
+        Type: "corrode"
+        MaxStack: 5
+        Value: 0.08
+        Duration: 6
+        TickInterval: 1
+        Notes: "Resist shred"
+    - m_Item_3:
+        Id: 4
+        Name: "ChainMark"
+        Type: "chainmark"
+        MaxStack: 1
+        Value: 0
+        Duration: 4
+        TickInterval: 0
+        Notes: "Helper for lightning effects"

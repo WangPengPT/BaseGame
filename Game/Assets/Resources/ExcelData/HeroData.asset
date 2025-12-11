@@ -9,7 +9,50 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a884e226ec0ec45996dba25e277a03, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.HeroData
-  rows: []
+  rows:
+    m_Size: 2
+    - m_Item_0:
+        Id: 1
+        Name: "Glacier Sentinel"
+        Role: "tank"
+        PrimaryElement: "ice"
+        BaseHp: 520
+        BaseMp: 120
+        Armor: 12
+        PhysicalResist: 0.1
+        MagicalResist: 0.05
+        IceResist: 0.25
+        FireResist: 0.05
+        LightningResist: 0.05
+        PoisonResist: 0.05
+        CritChance: 0.05
+        CritMultiplier: 2.0
+        Dodge: 0.03
+        AttackSpeed: 1.0
+        BaseSkills: "101;105"
+        AiBehaviorId: 1
+        ResistProfileId: 2
+    - m_Item_1:
+        Id: 2
+        Name: "Blaze Warden"
+        Role: "tank"
+        PrimaryElement: "fire"
+        BaseHp: 500
+        BaseMp: 140
+        Armor: 10
+        PhysicalResist: 0.1
+        MagicalResist: 0.05
+        IceResist: 0.05
+        FireResist: 0.25
+        LightningResist: 0.05
+        PoisonResist: 0.05
+        CritChance: 0.05
+        CritMultiplier: 2.0
+        Dodge: 0.03
+        AttackSpeed: 1.0
+        BaseSkills: "102;105"
+        AiBehaviorId: 1
+        ResistProfileId: 3

@@ -9,7 +9,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a38b63907e9c8641a16abc8ac0ed60f, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: ResistProfileData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.ResistProfileData
-  rows: []
+  rows:
+    m_Size: 5
+    - m_Item_0:
+        Id: 1
+        IceResist: 0.10
+        FireResist: 0.10
+        LightningResist: 0.10
+        PoisonResist: 0.10
+        ImmunityFlags: "none"
+    - m_Item_1:
+        Id: 2
+        IceResist: 0.30
+        FireResist: 0.05
+        LightningResist: 0.05
+        PoisonResist: 0.05
+        ImmunityFlags: "ice"
+    - m_Item_2:
+        Id: 3
+        IceResist: 0.05
+        FireResist: 0.30
+        LightningResist: 0.05
+        PoisonResist: 0.05
+        ImmunityFlags: "fire"
+    - m_Item_3:
+        Id: 4
+        IceResist: 0.05
+        FireResist: 0.05
+        LightningResist: 0.30
+        PoisonResist: 0.05
+        ImmunityFlags: "lightning"
+    - m_Item_4:
+        Id: 5
+        IceResist: 0.05
+        FireResist: 0.05
+        LightningResist: 0.05
+        PoisonResist: 0.30
+        ImmunityFlags: "poison"

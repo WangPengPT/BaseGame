@@ -9,8 +9,9 @@ import os
 import sys
 import csv
 import re
+import uuid
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 
 class CSVImporter:
@@ -223,10 +224,29 @@ class CSVImporter:
         
         return "\n".join(lines)
     
+    def get_script_guid(self, class_name: str) -> Optional[str]:
+        """从 .cs.meta 文件获取脚本 GUID"""
+        script_meta_path = self.script_output / f"{class_name}.cs.meta"
+        if script_meta_path.exists():
+            try:
+                content = script_meta_path.read_text(encoding='utf-8')
+                # 查找 guid: 行
+                for line in content.split('\n'):
+                    if line.strip().startswith('guid:'):
+                        guid = line.split(':', 1)[1].strip()
+                        return guid
+            except Exception as e:
+                print(f"  警告: 无法读取脚本 GUID: {e}")
+        return None
+    
     def generate_asset_file(self, class_name: str, headers: List[str], rows: List[Dict[str, str]]) -> str:
         """生成 Unity 资源文件"""
-        lines = []
+        script_guid = self.get_script_guid(class_name)
+        if not script_guid:
+            # 如果找不到 GUID，使用占位符（Unity 会在导入时自动修复）
+            script_guid = "00000000000000000000000000000000"
         
+        lines = []
         lines.append("%YAML 1.1")
         lines.append("%TAG !u! tag:unity3d.com,2011:")
         lines.append("--- !u!114 &11400000")
@@ -238,21 +258,38 @@ class CSVImporter:
         lines.append("  m_GameObject: {fileID: 0}")
         lines.append("  m_Enabled: 1")
         lines.append("  m_EditorHideFlags: 0")
-        lines.append("  m_Script: {fileID: 11500000, guid: 0, type: 3}")
+        lines.append(f"  m_Script: {{fileID: 11500000, guid: {script_guid}, type: 3}}")
         lines.append(f"  m_Name: {class_name}")
+        lines.append("  m_EditorClassIdentifier: Assembly-CSharp::ExcelData." + class_name)
         lines.append("  rows:")
-        lines.append(f"    m_Size: {len(rows)}")
+        if len(rows) == 0:
+            lines.append("    m_Size: 0")
+        else:
+            lines.append(f"    m_Size: {len(rows)}")
+            for i, row in enumerate(rows):
+                lines.append(f"    - m_Item_{i}:")
+                for header in headers:
+                    field_name = self.sanitize_field_name(header)
+                    raw_value = row.get(header, "")
+                    value = str(raw_value) if raw_value is not None else ""
+                    field_type = self.infer_field_type(rows, header)
+                    yaml_value = self.format_yaml_value(value, field_type)
+                    lines.append(f"        {field_name}: {yaml_value}")
         
-        for i, row in enumerate(rows):
-            lines.append(f"    m_Item_{i}:")
-            for header in headers:
-                field_name = self.sanitize_field_name(header)
-                raw_value = row.get(header, "")
-                value = str(raw_value) if raw_value is not None else ""
-                field_type = self.infer_field_type([row], header)
-                yaml_value = self.format_yaml_value(value, field_type)
-                lines.append(f"      {field_name}: {yaml_value}")
-        
+        return "\n".join(lines)
+    
+    def generate_asset_meta_file(self) -> str:
+        """生成 Unity 资源 .meta 文件"""
+        guid = str(uuid.uuid4()).replace('-', '')
+        lines = []
+        lines.append("fileFormatVersion: 2")
+        lines.append(f"guid: {guid}")
+        lines.append("NativeFormatImporter:")
+        lines.append("  externalObjects: {}")
+        lines.append("  mainObjectFileID: 11400000")
+        lines.append("  userData: ")
+        lines.append("  assetBundleName: ")
+        lines.append("  assetBundleVariant: ")
         return "\n".join(lines)
     
     def format_yaml_value(self, value: str, field_type: str) -> str:
@@ -263,7 +300,7 @@ class CSVImporter:
         
         if not value:
             if field_type == "string":
-                return '""'
+                return ""
             elif field_type == "int":
                 return "0"
             elif field_type == "float":
@@ -272,7 +309,8 @@ class CSVImporter:
                 return "0"
         
         if field_type == "string":
-            escaped = value.replace('"', '\\"')
+            # 转义特殊字符
+            escaped = value.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
             return f'"{escaped}"'
         elif field_type == "bool":
             lower = value.lower()
@@ -300,10 +338,23 @@ class CSVImporter:
             script_path.write_text(script_content, encoding='utf-8')
             print(f"  ✓ 生成脚本: {script_path.relative_to(self.unity_project_path)}")
             
-            # 不生成资源文件，让 Unity Editor 自动创建
-            # Unity 的 .asset 文件需要正确的 GUID 和脚本引用，手动生成容易出错
-            # 建议在 Unity Editor 中通过菜单 "Assets > Create > ExcelData > [ClassName]" 创建资源
-            print(f"  ℹ 资源文件需要在 Unity Editor 中手动创建")
+            # 等待 Unity 生成 .cs.meta 文件（如果不存在）
+            # 注意：如果脚本是新生成的，需要 Unity 先编译才能获取正确的 GUID
+            # 这里先尝试读取，如果不存在会在生成 asset 时使用占位符
+            
+            # 生成 Unity 资源文件
+            asset_content = self.generate_asset_file(file_name, headers, rows)
+            asset_path = self.asset_output / f"{file_name}.asset"
+            asset_path.parent.mkdir(parents=True, exist_ok=True)
+            asset_path.write_text(asset_content, encoding='utf-8')
+            print(f"  ✓ 生成资源: {asset_path.relative_to(self.unity_project_path)}")
+            
+            # 生成 .meta 文件（如果不存在）
+            asset_meta_path = self.asset_output / f"{file_name}.asset.meta"
+            if not asset_meta_path.exists():
+                meta_content = self.generate_asset_meta_file()
+                asset_meta_path.write_text(meta_content, encoding='utf-8')
+                print(f"  ✓ 生成资源元数据: {asset_meta_path.relative_to(self.unity_project_path)}")
             
             return True
             

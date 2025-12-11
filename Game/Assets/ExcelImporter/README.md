@@ -1,51 +1,13 @@
-# Excel 导入工具
+# ExcelData 运行时加载器
 
-这个工具可以将 Excel 文件（.xlsx, .xls）或 CSV 文件导入到 Unity 项目中，自动生成 C# 类定义和 ScriptableObject 资源。
+这个模块提供运行时加载 ExcelData ScriptableObject 资源的功能。数据类和数据资源由 Python 工具生成。
 
 ## 功能特性
 
-- ✅ 支持 Excel (.xlsx, .xls) 和 CSV 文件格式
-- ✅ 自动生成 C# 数据类
-- ✅ 自动生成 ScriptableObject 资源
-- ✅ 自动推断数据类型（int, float, bool, string）
 - ✅ 运行时数据读取管理器
-
-## 使用方法
-
-### 1. 准备 Excel 文件
-
-将 Excel 或 CSV 文件放在 `Document` 目录下。文件格式要求：
-- 第一行必须是字段名（表头）
-- 第二行开始是数据
-- 字段名会自动转换为 C# 合法的字段名（PascalCase）
-- **类名将自动使用文件名（去掉扩展名）**
-
-示例文件：
-- `示例数据.csv` → 类名：`示例数据`
-- `PlayerData.xlsx` → 类名：`PlayerData`
-- `物品配置.csv` → 类名：`物品配置`
-
-### 2. 打开导入工具
-
-在 Unity 编辑器中，点击菜单：`Tools > Excel Importer`
-
-### 3. 配置导入选项
-
-工具会自动扫描 `Document` 目录下的所有 Excel (.xlsx, .xls) 和 CSV 文件。
-
-- **Document 目录**: Document 文件夹路径（默认自动检测）
-- **资源输出路径**: ScriptableObject 资源保存路径（相对于 Assets）
-- **脚本输出路径**: C# 脚本保存路径（相对于 Assets）
-- **生成数据类**: 是否生成数据类脚本
-- **生成 ScriptableObject**: 是否生成 ScriptableObject 资源
-
-### 4. 执行批量导入
-
-点击"导入所有文件"按钮，工具会：
-1. 自动扫描 Document 目录下的所有文件
-2. 为每个文件生成对应的 C# 类（类名 = 文件名）
-3. 生成 ScriptableObject 资源（如果启用）
-4. 显示导入结果（成功/失败的文件列表）
+- ✅ 自动发现并加载所有 ExcelData 表
+- ✅ 支持懒加载模式（按需加载）
+- ✅ 类型安全的数据访问
 
 ## 运行时读取数据
 
@@ -74,10 +36,23 @@ if (table != null)
 }
 
 // 根据表名获取特定表（使用泛型，类型安全）
-// PlayerData playerData = ExcelDataLoader.GetTable<PlayerData>("PlayerData");
+PlayerData playerData = ExcelDataLoader.GetTable<PlayerData>("PlayerData");
 ```
 
-### 方法 2: 使用 ExcelDataManager
+### 方法 2: 懒加载模式（推荐用于大型项目）
+
+```csharp
+using ExcelImporter;
+
+// 初始化并开启懒加载模式
+ExcelDataLoader.InitializeLazy();
+
+// 表会在第一次访问时自动加载
+var enemyData = ExcelDataLoader.GetTable<EnemyData>();
+var heroData = ExcelDataLoader.GetTable<HeroData>();
+```
+
+### 方法 3: 使用 ExcelDataManager
 
 ```csharp
 using ExcelImporter;
@@ -90,101 +65,25 @@ ExcelDataManager.LoadAllTables();
 var allTables = ExcelDataManager.GetAllTables();
 
 // 根据表名获取表
-PlayerData data = ExcelDataManager.GetTable<PlayerData>("PlayerData");
+EnemyData data = ExcelDataManager.GetTable<EnemyData>("EnemyData");
 
 // 访问数据
 if (data != null)
 {
     for (int i = 0; i < data.Count; i++)
     {
-        PlayerDataRow row = data.GetRow(i);
-        Debug.Log($"ID: {row.Id}, Name: {row.Name}, Age: {row.Age}");
+        EnemyDataRow row = data.GetRow(i);
+        Debug.Log($"ID: {row.Id}, Name: {row.Name}");
     }
 }
 ```
 
-### 方法 3: 直接使用 Resources.Load（不推荐）
+## 数据生成
 
-```csharp
-using ExcelData;
-
-PlayerData data = Resources.Load<PlayerData>("PlayerData");
-if (data != null)
-{
-    foreach (var row in data.rows)
-    {
-        Debug.Log($"Name: {row.Name}, Score: {row.Score}");
-    }
-}
-```
-
-## 支持的文件格式
-
-### CSV 格式（推荐）
-
-CSV 格式最简单，不需要任何额外依赖。只需将 Excel 文件另存为 CSV 格式即可。
-
-### Excel 格式
-
-支持两种方式读取 Excel：
-
-1. **System.Data.OleDb**（默认）
-   - 需要安装 Microsoft Access Database Engine
-   - 下载地址：https://www.microsoft.com/en-us/download/details.aspx?id=54920
-
-2. **EPPlus**（可选）
-   - 需要安装 EPPlus.Core 库
-   - 通过 NuGet 或手动添加 DLL
-
-## 生成的文件结构
-
-导入后会生成以下文件：
-
-```
-Assets/
-  ExcelData/
-    Scripts/
-      PlayerData.cs          # 数据类定义
-    Resources/
-      PlayerData.asset       # ScriptableObject 资源
-```
-
-## 数据类型推断规则
-
-工具会根据数据内容自动推断字段类型：
-
-- **bool**: 值为 "true"/"false"/"1"/"0"/"yes"/"no"
-- **int**: 所有值都是整数
-- **float**: 所有值都是数字（包含小数）
-- **string**: 其他情况
+数据类和 ScriptableObject 资源由 Python 工具生成，请参考 Python 工具的文档。
 
 ## 注意事项
 
-1. Excel 文件的第一行必须是字段名
-2. 字段名中的空格和特殊字符会被自动处理
-3. 如果字段名是 C# 关键字，会自动添加 @ 前缀
-4. 空行会被跳过
-5. 资源文件会保存在指定的 Resources 路径下，以便运行时加载
-
-## 故障排除
-
-### 无法读取 Excel 文件
-
-如果遇到 "无法使用 OleDb 读取 Excel" 错误：
-1. 安装 Microsoft Access Database Engine
-2. 或者将 Excel 文件导出为 CSV 格式
-
-### 生成的类找不到
-
-如果编译后找不到生成的类：
-1. 确保脚本已保存
-2. 等待 Unity 编译完成
-3. 检查命名空间是否正确（默认：ExcelData）
-
-### 资源加载失败
-
-如果运行时无法加载资源：
-1. 确保资源文件在 Resources 文件夹下
-2. 检查资源路径是否正确
-3. 确保资源文件已正确生成
-
+1. 资源文件必须保存在 `Resources/ExcelData` 路径下
+2. 确保数据类已正确生成在 `Scripts/ExcelData` 目录下
+3. 使用懒加载模式可以减少启动时的加载时间

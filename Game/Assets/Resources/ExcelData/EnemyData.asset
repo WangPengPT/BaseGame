@@ -9,7 +9,50 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3dfc15a3384aee4ea50eac42e2e27b0, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: EnemyData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.EnemyData
-  rows: []
+  rows:
+    m_Size: 2
+    - m_Item_0:
+        Id: 201
+        Name: "Frost Imp"
+        Role: "ranged"
+        PrimaryElement: "ice"
+        BaseHp: 120
+        BaseMp: 40
+        Armor: 1
+        PhysicalResist: 0.05
+        MagicalResist: 0.05
+        IceResist: 0.15
+        FireResist: 0.00
+        LightningResist: 0.00
+        PoisonResist: 0.00
+        CritChance: 0.0
+        CritMultiplier: 1.5
+        Dodge: 0.0
+        AttackSpeed: 1.1
+        BaseSkills: 101
+        AiBehaviorId: 5
+        ResistProfileId: 2
+    - m_Item_1:
+        Id: 202
+        Name: "Fire Imp"
+        Role: "ranged"
+        PrimaryElement: "fire"
+        BaseHp: 120
+        BaseMp: 40
+        Armor: 1
+        PhysicalResist: 0.05
+        MagicalResist: 0.05
+        IceResist: 0.00
+        FireResist: 0.15
+        LightningResist: 0.00
+        PoisonResist: 0.00
+        CritChance: 0.0
+        CritMultiplier: 1.5
+        Dodge: 0.0
+        AttackSpeed: 1.1
+        BaseSkills: 102
+        AiBehaviorId: 5
+        ResistProfileId: 3

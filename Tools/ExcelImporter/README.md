@@ -43,17 +43,25 @@ python import_csv.py "../../Document/Config" "../../Game" "Assets/Scripts/ExcelD
 - ✅ 读取 CSV 文件
 - ✅ 自动生成 C# 类文件
 - ✅ 自动生成 Unity ScriptableObject 资源文件（.asset）
+- ✅ 自动生成资源元数据文件（.asset.meta）
+- ✅ 自动从脚本 .meta 文件读取 GUID
 - ✅ 自动类型推断（int, float, bool, string）
 - ✅ 自动生成 GetById 方法
 - ✅ 直接写入 Unity Assets 目录
+- ✅ 完整的数据序列化支持
 
 ## 工作流程
 
 1. 工具扫描 `Document/Config` 目录下的所有 CSV 文件
 2. 读取 CSV 文件，解析表头和数据
 3. 生成 C# 脚本文件到 `Assets/Scripts/ExcelData`
-4. 生成 Unity 资源文件到 `Assets/Resources/ExcelData`
-5. Unity 会自动检测到新文件并重新导入
+4. 等待 Unity 编译脚本并生成 .cs.meta 文件（如果脚本是新生成的）
+5. 从 .cs.meta 文件读取脚本 GUID
+6. 生成 Unity 资源文件（.asset）到 `Assets/Resources/ExcelData`
+7. 生成资源元数据文件（.asset.meta）
+8. Unity 会自动检测到新文件并重新导入
+
+**注意**：如果脚本是新生成的，建议先运行一次让 Unity 编译脚本生成 .meta 文件，然后再运行一次以生成包含正确 GUID 的资源文件。或者可以在 Unity Editor 中手动刷新一次。
 
 ## 注意事项
 
@@ -62,6 +70,8 @@ python import_csv.py "../../Document/Config" "../../Game" "Assets/Scripts/ExcelD
 - 如果字段名包含 "id"（不区分大小写），会自动生成 GetById 方法
 - 生成的资源文件需要 Unity 重新导入才能使用
 - CSV 文件应使用 UTF-8 编码（带或不带 BOM 都可以）
+- 如果脚本是新生成的，Unity 需要先编译脚本生成 .meta 文件，工具才能读取正确的 GUID
+- 如果找不到脚本 GUID，工具会使用占位符，Unity 在导入时会自动修复
 
 ## 故障排除
 

@@ -9,7 +9,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1516653c5761e254b8db7e83f6667bd6, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: AIBehaviorData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.AIBehaviorData
-  rows: []
+  rows:
+    m_Size: 2
+    - m_Item_0:
+        Id: 1
+        Name: "Tank Default"
+        TargetPriority: "nearest"
+        KiteDistance: 0
+        EngageRange: 3.5
+        RetreatThresholdHp: 0.25
+        AbilityPriority: "heavy>basic"
+        ManaReservePct: 0.05
+    - m_Item_1:
+        Id: 2
+        Name: "Ranged Focus"
+        TargetPriority: "nearest"
+        KiteDistance: 4.0
+        EngageRange: 6.0
+        RetreatThresholdHp: 0.20
+        AbilityPriority: "basic>aoe"
+        ManaReservePct: 0.10

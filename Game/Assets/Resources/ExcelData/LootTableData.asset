@@ -9,7 +9,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c2c568475f493045ac8905d990b3c6a, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: LootTableData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.LootTableData
-  rows: []
+  rows:
+    m_Size: 2
+    - m_Item_0:
+        TableId: 1
+        EntryId: 1
+        ItemId: 1001
+        PoolId: 0
+        Weight: 30
+        MinLevel: 1
+        MaxLevel: 20
+        QuantityRange: "1-1"
+        RarityBias: 0.0
+    - m_Item_1:
+        TableId: 1
+        EntryId: 2
+        ItemId: 1002
+        PoolId: 0
+        Weight: 30
+        MinLevel: 1
+        MaxLevel: 20
+        QuantityRange: "1-1"
+        RarityBias: 0.0

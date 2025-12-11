@@ -9,7 +9,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3501bd06ea5aee248933793743de3c59, type: 3}
+  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
   m_Name: AffixData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.AffixData
-  rows: []
+  rows:
+    m_Size: 3
+    - m_Item_0:
+        Id: 1
+        Name: "Ice Skill Damage"
+        Category: "offense"
+        ElementTag: "ice"
+        MinValue: 5
+        MaxValue: 15
+        RollType: "percent"
+        Target: "skill_element"
+        MaxRollsPerItem: 2
+        Tags: "freeze_duration"
+    - m_Item_1:
+        Id: 2
+        Name: "Crit Damage"
+        Category: "offense"
+        ElementTag: "none"
+        MinValue: 10
+        MaxValue: 25
+        RollType: "percent"
+        Target: "crit_damage"
+        MaxRollsPerItem: 2
+        Tags: 
+    - m_Item_2:
+        Id: 3
+        Name: "Fire Over Time"
+        Category: "offense"
+        ElementTag: "fire"
+        MinValue: 4
+        MaxValue: 10
+        RollType: "percent"
+        Target: "burn_dps"
+        MaxRollsPerItem: 2
+        Tags: "burn_stack"
