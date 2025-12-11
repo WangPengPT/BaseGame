@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00000000000000000000000000000000, type: 3}
+  m_Script: {fileID: 11500000, guid: e4a884e226ec0ec45996dba25e277a03, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::ExcelData.HeroData
   rows:

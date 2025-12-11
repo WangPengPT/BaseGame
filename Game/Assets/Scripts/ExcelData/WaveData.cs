@@ -18,6 +18,9 @@ namespace ExcelData
         public bool AutoStart;
         public float EarlyStartBonus;
         public string RewardTableId;
+        public string SpawnPointGroupName;
+        public string CenterPointName;
+        public string EnemyPrefabPath;
     }
 
     [CreateAssetMenu(fileName = "WaveData", menuName = "ExcelData/WaveData")]

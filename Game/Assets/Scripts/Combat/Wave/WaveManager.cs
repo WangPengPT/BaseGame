@@ -15,19 +15,13 @@ namespace Game.Combat.Wave
     {
         [Header("Wave Settings")]
         public int CurrentWaveIndex = 0;
-        public float PrepTime = 5f;
-        public bool AutoStartNextWave = true;
-        public float EarlyStartBonus = 0.1f; // 10% bonus for early start
-
-        [Header("Spawn Settings")]
-        public Transform[] SpawnPoints;
-        public GameObject EnemyPrefab;
-        public LayerMask EnemyLayer;
+        // 注意：以下配置现在从Excel数据中读取，无需在Inspector中设置
+        // PrepTime, AutoStart, EarlyStartBonus 等将从WaveData中读取
 
         [Header("Reward Settings")]
-        public Transform RewardDropPoint;
-        public GameObject GoldPrefab;
-        public GameObject ItemPrefab;
+        public Transform RewardDropPoint; // 奖励掉落点（可选，如果为空则使用中心点）
+        public GameObject GoldPrefab; // 金币预制体（可选）
+        public GameObject ItemPrefab; // 物品预制体（可选）
 
         private List<CombatActor> _activeEnemies = new List<CombatActor>();
         private bool _isPreparing = false;
@@ -35,6 +29,11 @@ namespace Game.Combat.Wave
         private float _prepTimer = 0f;
         private float _waveStartTime = 0f;
         private bool _earlyStartUsed = false;
+
+        // 当前关卡的动态配置（从数据中加载）
+        private Transform[] _currentSpawnPoints;
+        private Transform _currentCenterPoint;
+        private GameObject _currentEnemyPrefab;
 
         public System.Action<int> OnWaveStarted;
         public System.Action<int> OnWaveCompleted;
@@ -64,25 +63,56 @@ namespace Game.Combat.Wave
 
         private IEnumerator PrepPhase()
         {
+            var waveData = GetWaveData(CurrentWaveIndex);
+            if (waveData == null)
+            {
+                Debug.LogWarning($"Wave {CurrentWaveIndex} not found in data");
+                yield break;
+            }
+
+            // 从数据中加载当前关卡的配置
+            LoadWaveConfig(waveData);
+
             _isPreparing = true;
-            _prepTimer = PrepTime;
+            _prepTimer = waveData.PrepTime;
             _earlyStartUsed = false;
 
             OnWaveStarted?.Invoke(CurrentWaveIndex);
 
-            while (_prepTimer > 0f)
+            // 如果AutoStart为false，等待玩家手动开始
+            if (!waveData.AutoStart)
             {
-                _prepTimer -= Time.deltaTime;
-                OnPrepTimerChanged?.Invoke(_prepTimer);
-
-                // Check for early start (player can press a key or button)
-                if (Input.GetKeyDown(KeyCode.Space) && !_earlyStartUsed)
+                while (_prepTimer > 0f)
                 {
-                    _earlyStartUsed = true;
-                    break; // Start wave early
-                }
+                    _prepTimer -= Time.deltaTime;
+                    OnPrepTimerChanged?.Invoke(_prepTimer);
 
-                yield return null;
+                    // Check for early start (player can press a key or button)
+                    if (Input.GetKeyDown(KeyCode.Space) && !_earlyStartUsed)
+                    {
+                        _earlyStartUsed = true;
+                        break; // Start wave early
+                    }
+
+                    yield return null;
+                }
+            }
+            else
+            {
+                // AutoStart为true时，仍然允许提前开始
+                while (_prepTimer > 0f)
+                {
+                    _prepTimer -= Time.deltaTime;
+                    OnPrepTimerChanged?.Invoke(_prepTimer);
+
+                    if (Input.GetKeyDown(KeyCode.Space) && !_earlyStartUsed)
+                    {
+                        _earlyStartUsed = true;
+                        break;
+                    }
+
+                    yield return null;
+                }
             }
 
             _isPreparing = false;
@@ -111,7 +141,7 @@ namespace Game.Combat.Wave
 
                 for (int i = 0; i < entry.Count; i++)
                 {
-                    SpawnEnemy(entry.EnemyId, entry.IsElite, difficulty);
+                    SpawnEnemy(entry.EnemyId, entry.IsElite, difficulty, entry.SpawnPattern, entry.Count, i);
                     yield return new WaitForSeconds(0.2f); // Small delay between spawns
                 }
             }
@@ -142,11 +172,81 @@ namespace Game.Combat.Wave
             CurrentWaveIndex++;
         }
 
-        private void SpawnEnemy(int enemyId, bool isElite, float difficultyScalar)
+        /// <summary>
+        /// 获取当前关卡的奖励掉落点（如果未设置则使用中心点）
+        /// </summary>
+        private Transform GetRewardDropPoint()
         {
-            if (EnemyPrefab == null || SpawnPoints == null || SpawnPoints.Length == 0)
+            if (RewardDropPoint != null)
+                return RewardDropPoint;
+            
+            if (_currentCenterPoint != null)
+                return _currentCenterPoint;
+            
+            return transform; // 最后使用WaveManager自身的位置
+        }
+
+        /// <summary>
+        /// 从WaveData中加载当前关卡的配置（生成点、中心点、敌人预制体等）
+        /// </summary>
+        private void LoadWaveConfig(WaveDataRow waveData)
+        {
+            // 加载生成点组
+            if (!string.IsNullOrEmpty(waveData.SpawnPointGroupName))
             {
-                Debug.LogWarning("EnemyPrefab or SpawnPoints not set");
+                GameObject spawnGroup = GameObject.Find(waveData.SpawnPointGroupName);
+                if (spawnGroup != null)
+                {
+                    var spawnList = new List<Transform>();
+                    foreach (Transform child in spawnGroup.transform)
+                    {
+                        spawnList.Add(child);
+                    }
+                    _currentSpawnPoints = spawnList.ToArray();
+                }
+                else
+                {
+                    Debug.LogWarning($"找不到生成点组: {waveData.SpawnPointGroupName}");
+                    _currentSpawnPoints = new Transform[0];
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Wave {waveData.WaveIndex} 未配置生成点组名称");
+                _currentSpawnPoints = new Transform[0];
+            }
+
+            // 加载中心点
+            if (!string.IsNullOrEmpty(waveData.CenterPointName))
+            {
+                GameObject centerObj = GameObject.Find(waveData.CenterPointName);
+                _currentCenterPoint = centerObj != null ? centerObj.transform : null;
+                if (_currentCenterPoint == null)
+                {
+                    Debug.LogWarning($"找不到中心点: {waveData.CenterPointName}");
+                }
+            }
+
+            // 加载敌人预制体
+            if (!string.IsNullOrEmpty(waveData.EnemyPrefabPath))
+            {
+                _currentEnemyPrefab = Resources.Load<GameObject>(waveData.EnemyPrefabPath);
+                if (_currentEnemyPrefab == null)
+                {
+                    Debug.LogWarning($"找不到敌人预制体: {waveData.EnemyPrefabPath}，请确保预制体在Resources文件夹中");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Wave {waveData.WaveIndex} 未配置敌人预制体路径");
+            }
+        }
+
+        private void SpawnEnemy(int enemyId, bool isElite, float difficultyScalar, string spawnPattern = "circle", int totalCount = 1, int spawnIndex = 0)
+        {
+            if (_currentEnemyPrefab == null || _currentSpawnPoints == null || _currentSpawnPoints.Length == 0)
+            {
+                Debug.LogWarning("敌人预制体或生成点未正确加载，请检查Excel配置");
                 return;
             }
 
@@ -157,9 +257,27 @@ namespace Game.Combat.Wave
                 return;
             }
 
-            // Pick random spawn point
-            Transform spawnPoint = SpawnPoints[Random.Range(0, SpawnPoints.Length)];
-            GameObject enemyObj = Instantiate(EnemyPrefab, spawnPoint.position, spawnPoint.rotation);
+            // 根据生成模式计算位置
+            Vector3 spawnPosition = SpawnPatternHelper.GetSpawnPosition(
+                spawnPattern, 
+                _currentSpawnPoints, 
+                _currentCenterPoint, 
+                totalCount, 
+                spawnIndex
+            );
+
+            // 计算朝向（朝向中心点或玩家）
+            Quaternion spawnRotation = Quaternion.identity;
+            if (_currentCenterPoint != null)
+            {
+                Vector3 direction = (_currentCenterPoint.position - spawnPosition).normalized;
+                if (direction != Vector3.zero)
+                {
+                    spawnRotation = Quaternion.LookRotation(direction);
+                }
+            }
+
+            GameObject enemyObj = Instantiate(_currentEnemyPrefab, spawnPosition, spawnRotation);
 
             // Setup enemy actor
             var actor = enemyObj.GetComponent<CombatActor>();
@@ -294,15 +412,16 @@ namespace Game.Combat.Wave
 
         private void DropRewards(List<RewardItem> rewards)
         {
-            if (RewardDropPoint == null) return;
+            Transform dropPoint = GetRewardDropPoint();
+            if (dropPoint == null) return;
 
             foreach (var reward in rewards)
             {
                 GameObject prefab = reward.Type == RewardType.Gold ? GoldPrefab : ItemPrefab;
                 if (prefab == null) continue;
 
-                Vector3 pos = RewardDropPoint.position + Random.insideUnitSphere * 2f;
-                pos.y = RewardDropPoint.position.y;
+                Vector3 pos = dropPoint.position + Random.insideUnitSphere * 2f;
+                pos.y = dropPoint.position.y;
                 GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
 
                 // TODO: Setup reward component on object
