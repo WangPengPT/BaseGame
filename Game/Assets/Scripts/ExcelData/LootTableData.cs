@@ -9,12 +9,12 @@ namespace ExcelData
     [Serializable]
     public class LootTableDataRow
     {
-        public bool TableId;
+        public int TableId;
         public int EntryId;
         public int ItemId;
         public int PoolId;
         public int Weight;
-        public bool MinLevel;
+        public int MinLevel;
         public int MaxLevel;
         public string QuantityRange;
         public float RarityBias;

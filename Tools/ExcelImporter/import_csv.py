@@ -70,6 +70,13 @@ class CSVImporter:
         all_int = True
         all_float = True
         all_bool = True
+        header_lower = header.lower()
+        
+        # 根据字段名判断类型提示
+        is_likely_numeric = any(keyword in header_lower for keyword in 
+                               ['time', 'count', 'id', 'index', 'scalar', 'amount', 'value', 'number', 'num', 'size', 'length', 'distance', 'radius', 'speed'])
+        is_likely_bool = any(keyword in header_lower for keyword in 
+                            ['is_', 'has_', 'can_', 'should_', 'enable', 'disable', 'active', 'visible'])
         
         for row in rows:
             raw_value = row.get(header, "")
@@ -78,6 +85,10 @@ class CSVImporter:
             value = str(raw_value).strip()
             if not value:
                 continue
+            
+            lower = value.lower()
+            # 检查是否是明确的布尔值（不区分大小写）
+            is_explicit_bool = lower in ('true', 'false', 'yes', 'no', '1', '0')
             
             if all_int:
                 try:
@@ -92,8 +103,8 @@ class CSVImporter:
                     all_float = False
             
             if all_bool:
-                lower = value.lower()
-                if lower not in ('true', 'false', '1', '0', 'yes', 'no'):
+                # 如果值不是明确的布尔值，则不是 bool 类型
+                if not is_explicit_bool:
                     all_bool = False
         
         # 检查是否有非空值
@@ -103,12 +114,49 @@ class CSVImporter:
             if row.get(header) is not None
         )
         
-        if all_bool and has_value:
+        # 类型优先级：
+        # 1. 如果值是明确的布尔值（TRUE/FALSE/true/false），优先判断为 bool
+        # 2. 如果字段名暗示是数值类型，且值不是布尔值，判断为数值
+        # 3. 如果字段名暗示是 bool 类型，判断为 bool
+        # 4. 默认优先级：int > float > bool > string
+        
+        # 检查所有值是否都是明确的布尔值（不包括 "1"/"0"，除非字段名暗示是 bool）
+        all_explicit_bool = True
+        for row in rows:
+            raw_value = row.get(header, "")
+            if raw_value is None:
+                continue
+            value = str(raw_value).strip()
+            if not value:
+                continue
+            lower = value.lower()
+            # 只有 true/false/yes/no 才算明确的布尔值，"1"/"0" 不算（除非字段名暗示是 bool）
+            if lower not in ('true', 'false', 'yes', 'no'):
+                all_explicit_bool = False
+                break
+        
+        # 如果所有值都是明确的布尔值（TRUE/FALSE），优先判断为 bool
+        if all_explicit_bool and all_bool and has_value:
             return "bool"
+        
+        # 如果字段名暗示是数值类型，且值不是布尔值，判断为数值
+        if is_likely_numeric:
+            if all_int:
+                return "int"
+            if all_float:
+                return "float"
+        
+        # 如果字段名暗示是 bool 类型，判断为 bool
+        if is_likely_bool and all_bool and has_value:
+            return "bool"
+        
+        # 默认优先级：int > float > bool > string
         if all_int:
             return "int"
         if all_float:
             return "float"
+        if all_bool and has_value:
+            return "bool"
         
         return "string"
     
@@ -137,6 +185,9 @@ class CSVImporter:
                 headers = reader.fieldnames or []
                 
                 for row in reader:
+                    # 跳过空行：检查所有字段是否都为空
+                    if not any(str(v).strip() for v in row.values() if v is not None):
+                        continue
                     rows.append(dict(row))
         except Exception as e:
             print(f"  错误: 读取 CSV 失败: {e}")

@@ -27,7 +27,7 @@ namespace ExcelData
         public float Dodge;
         public float AttackSpeed;
         public string BaseSkills;
-        public bool AiBehaviorId;
+        public int AiBehaviorId;
         public int ResistProfileId;
     }
 

@@ -5,6 +5,7 @@ using Game.Combat;
 using ExcelImporter;
 using ExcelData;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Combat.Wave
 {
@@ -33,7 +34,6 @@ namespace Game.Combat.Wave
         // 当前关卡的动态配置（从数据中加载）
         private Transform[] _currentSpawnPoints;
         private Transform _currentCenterPoint;
-        private GameObject _currentEnemyPrefab;
 
         public System.Action<int> OnWaveStarted;
         public System.Action<int> OnWaveCompleted;
@@ -42,6 +42,7 @@ namespace Game.Combat.Wave
 
         private void Start()
         {
+            if (CurrentWaveIndex < 1) CurrentWaveIndex = 1;
             CombatDataRegistry.Initialize(lazy: true);
             StartCoroutine(WaveLoop());
         }
@@ -50,10 +51,18 @@ namespace Game.Combat.Wave
         {
             while (true)
             {
+                // 检查当前波次是否存在
+                var waveData = GetWaveData(CurrentWaveIndex);
+                if (waveData == null)
+                {
+                    Debug.Log($"Wave {CurrentWaveIndex} 不存在，关卡结束");
+                    break; // 没有更多波次，结束循环
+                }
+
                 // Prep phase
                 yield return StartCoroutine(PrepPhase());
 
-                // Wave phase
+                // Wave phase - 等待所有敌人生成并清理完成
                 yield return StartCoroutine(WavePhase());
 
                 // Reward phase
@@ -88,7 +97,7 @@ namespace Game.Combat.Wave
                     OnPrepTimerChanged?.Invoke(_prepTimer);
 
                     // Check for early start (player can press a key or button)
-                    if (Input.GetKeyDown(KeyCode.Space) && !_earlyStartUsed)
+                    if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && !_earlyStartUsed)
                     {
                         _earlyStartUsed = true;
                         break; // Start wave early
@@ -105,7 +114,7 @@ namespace Game.Combat.Wave
                     _prepTimer -= Time.deltaTime;
                     OnPrepTimerChanged?.Invoke(_prepTimer);
 
-                    if (Input.GetKeyDown(KeyCode.Space) && !_earlyStartUsed)
+                    if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && !_earlyStartUsed)
                     {
                         _earlyStartUsed = true;
                         break;
@@ -127,13 +136,17 @@ namespace Game.Combat.Wave
             if (waveData == null)
             {
                 Debug.LogWarning($"Wave {CurrentWaveIndex} not found in data");
+                _isWaveActive = false;
                 yield break;
             }
+
+            // 清空上一波的敌人列表，确保从干净状态开始
+            _activeEnemies.Clear();
 
             // Apply difficulty scalar
             float difficulty = waveData.DifficultyScalar;
 
-            // Spawn enemies
+            // Spawn enemies - 等待所有敌人生成完成
             var entries = GetWaveEntries(waveData.Id);
             foreach (var entry in entries)
             {
@@ -146,11 +159,12 @@ namespace Game.Combat.Wave
                 }
             }
 
-            // Wait for all enemies to be defeated
+            // 等待所有敌人被击败 - 确保一波的怪全部清理完成才进入下一波
             while (_activeEnemies.Count > 0)
             {
+                // 清理已死亡或已销毁的敌人
                 _activeEnemies.RemoveAll(e => e == null || e.IsDead);
-                yield return new WaitForSeconds(0.5f);
+                yield return null; // 每帧检查一次，更及时响应
             }
 
             _isWaveActive = false;
@@ -162,7 +176,7 @@ namespace Game.Combat.Wave
             var waveData = GetWaveData(CurrentWaveIndex);
             if (waveData == null) yield break;
 
-            var rewards = GenerateRewards(waveData.RewardTableId, _earlyStartUsed);
+            var rewards = GenerateRewards(waveData.RewardTableId);
             DropRewards(rewards);
 
             OnRewardsDropped?.Invoke(rewards);
@@ -187,7 +201,8 @@ namespace Game.Combat.Wave
         }
 
         /// <summary>
-        /// 从WaveData中加载当前关卡的配置（生成点、中心点、敌人预制体等）
+        /// 从WaveData中加载当前关卡的配置（生成点、中心点等）
+        /// 注意：敌人预制体路径现在从EnemyData中读取，不再从WaveData中读取
         /// </summary>
         private void LoadWaveConfig(WaveDataRow waveData)
         {
@@ -226,27 +241,13 @@ namespace Game.Combat.Wave
                     Debug.LogWarning($"找不到中心点: {waveData.CenterPointName}");
                 }
             }
-
-            // 加载敌人预制体
-            if (!string.IsNullOrEmpty(waveData.EnemyPrefabPath))
-            {
-                _currentEnemyPrefab = Resources.Load<GameObject>(waveData.EnemyPrefabPath);
-                if (_currentEnemyPrefab == null)
-                {
-                    Debug.LogWarning($"找不到敌人预制体: {waveData.EnemyPrefabPath}，请确保预制体在Resources文件夹中");
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"Wave {waveData.WaveIndex} 未配置敌人预制体路径");
-            }
         }
 
         private void SpawnEnemy(int enemyId, bool isElite, float difficultyScalar, string spawnPattern = "circle", int totalCount = 1, int spawnIndex = 0)
         {
-            if (_currentEnemyPrefab == null || _currentSpawnPoints == null || _currentSpawnPoints.Length == 0)
+            if (_currentSpawnPoints == null || _currentSpawnPoints.Length == 0)
             {
-                Debug.LogWarning("敌人预制体或生成点未正确加载，请检查Excel配置");
+                Debug.LogWarning("生成点未正确加载，请检查Excel配置");
                 return;
             }
 
@@ -254,6 +255,20 @@ namespace Game.Combat.Wave
             if (enemyData == null)
             {
                 Debug.LogWarning($"Enemy {enemyId} not found");
+                return;
+            }
+
+            // 从 EnemyData 中加载敌人预制体
+            if (string.IsNullOrEmpty(enemyData.PrefabPath))
+            {
+                Debug.LogWarning($"Enemy {enemyId} ({enemyData.Name}) 未配置预制体路径");
+                return;
+            }
+
+            GameObject enemyPrefab = Resources.Load<GameObject>(enemyData.PrefabPath);
+            if (enemyPrefab == null)
+            {
+                Debug.LogWarning($"找不到敌人预制体: {enemyData.PrefabPath}，请确保预制体在Resources文件夹中");
                 return;
             }
 
@@ -277,7 +292,7 @@ namespace Game.Combat.Wave
                 }
             }
 
-            GameObject enemyObj = Instantiate(_currentEnemyPrefab, spawnPosition, spawnRotation);
+            GameObject enemyObj = Instantiate(enemyPrefab, spawnPosition, spawnRotation);
 
             // Setup enemy actor
             var actor = enemyObj.GetComponent<CombatActor>();
@@ -288,7 +303,7 @@ namespace Game.Combat.Wave
                 actor.Stats.Hp = actor.Stats.MaxHp;
                 actor.Stats.MaxMp = enemyData.BaseMp;
                 actor.Stats.Mp = actor.Stats.MaxMp;
-                actor.Stats.Armor = enemyData.Armor ? 1f : 0f; // Convert bool to float
+                actor.Stats.Armor = enemyData.Armor;
 
                 // Apply resistances
                 if (enemyData.ResistProfileId > 0)
@@ -324,6 +339,24 @@ namespace Game.Combat.Wave
                 _activeEnemies.Add(actor);
             }
 
+            // 添加移动控制器（如果不存在）
+            var movementController = enemyObj.GetComponent<CombatMovementController>();
+            if (movementController == null)
+            {
+                movementController = enemyObj.AddComponent<CombatMovementController>();
+            }
+
+            // 添加动画控制器（如果存在 Animator 组件）
+            var animator = enemyObj.GetComponent<Animator>();
+            if (animator != null)
+            {
+                var animationController = enemyObj.GetComponent<CombatAnimationController>();
+                if (animationController == null)
+                {
+                    animationController = enemyObj.AddComponent<CombatAnimationController>();
+                }
+            }
+
             // Setup AI if available
             var ai = enemyObj.GetComponent<AI.CombatAIController>();
             if (ai != null && enemyData.BaseSkills > 0)
@@ -347,7 +380,12 @@ namespace Game.Combat.Wave
         private List<WaveEntryDataRow> GetWaveEntries(int waveId)
         {
             var table = ExcelDataLoader.GetTable<WaveEntryData>();
-            return table?.rows.Where(r => r.WaveId == waveId).ToList() ?? new List<WaveEntryDataRow>();
+            if (table == null) return new List<WaveEntryDataRow>();
+            
+            // 过滤掉无效数据（Id为0或空的数据，可能是CSV空行导致的）
+            return table.rows
+                .Where(r => r != null && r.Id > 0 && r.WaveId == waveId)
+                .ToList();
         }
 
         private WaveRewardDataRow GetRewardData(string rewardTableId)
@@ -383,17 +421,14 @@ namespace Game.Combat.Wave
             return ids;
         }
 
-        private List<RewardItem> GenerateRewards(string rewardTableId, bool earlyStart)
+        private List<RewardItem> GenerateRewards(string rewardTableId)
         {
             var rewards = new List<RewardItem>();
             var rewardData = GetRewardData(rewardTableId);
             if (rewardData == null) return rewards;
 
-            float bonus = earlyStart ? EarlyStartBonus : 0f;
-
             // Gold
             int gold = Random.Range(rewardData.GoldMin, rewardData.GoldMax + 1);
-            gold = Mathf.RoundToInt(gold * (1f + bonus));
             if (gold > 0)
             {
                 rewards.Add(new RewardItem { Type = RewardType.Gold, Amount = gold });

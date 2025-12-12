@@ -9,7 +9,7 @@ namespace ExcelData
     [Serializable]
     public class SetDataRow
     {
-        public bool SetId;
+        public int SetId;
         public string Name;
         public int PieceIds;
     }

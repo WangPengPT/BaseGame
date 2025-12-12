@@ -1,4 +1,4 @@
-id,name,role,primary_element,base_hp,base_mp,armor,physical_resist,magical_resist,ice_resist,fire_resist,lightning_resist,poison_resist,crit_chance,crit_multiplier,dodge,attack_speed,base_skills,ai_behavior_id,resist_profile_id
-201,Frost Imp,ranged,ice,120,40,1,0.05,0.05,0.15,0.00,0.00,0.00,0.0,1.5,0.0,1.1,"101",5,2
-202,Fire Imp,ranged,fire,120,40,1,0.05,0.05,0.00,0.15,0.00,0.00,0.0,1.5,0.0,1.1,"102",5,3
+id,name,role,primary_element,base_hp,base_mp,armor,physical_resist,magical_resist,ice_resist,fire_resist,lightning_resist,poison_resist,crit_chance,crit_multiplier,dodge,attack_speed,base_skills,ai_behavior_id,resist_profile_id,prefab_path
+201,Frost Imp,ranged,ice,120,40,1,0.05,0.05,0.15,0.00,0.00,0.00,0.0,1.5,0.0,1.1,"101",5,2,Enemies/FrostImp
+202,Fire Imp,ranged,fire,120,40,1,0.05,0.05,0.00,0.15,0.00,0.00,0.0,1.5,0.0,1.1,"102",5,3,Enemies/FireImp
 

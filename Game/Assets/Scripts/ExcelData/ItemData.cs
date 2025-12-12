@@ -16,8 +16,8 @@ namespace ExcelData
         public int RequiredLevel;
         public string BaseStat;
         public string AllowedAffixPoolIds;
-        public bool LegendaryId;
-        public bool SetId;
+        public int LegendaryId;
+        public int SetId;
     }
 
     [CreateAssetMenu(fileName = "ItemData", menuName = "ExcelData/ItemData")]

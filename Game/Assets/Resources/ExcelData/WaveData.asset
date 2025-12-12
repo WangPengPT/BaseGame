@@ -19,8 +19,8 @@ MonoBehaviour:
         Name: "Wave 1"
         WaveIndex: 1
         IsBossWave: 0
-        DifficultyScalar: 1.0
-        PrepTime: 5.0
+        DifficultyScalar: 1
+        PrepTime: 1
         AutoStart: 1
         EarlyStartBonus: 0.1
         RewardTableId: "reward_1"
@@ -33,7 +33,7 @@ MonoBehaviour:
         WaveIndex: 2
         IsBossWave: 0
         DifficultyScalar: 1.2
-        PrepTime: 5.0
+        PrepTime: 1
         AutoStart: 1
         EarlyStartBonus: 0.1
         RewardTableId: "reward_2"
@@ -46,7 +46,7 @@ MonoBehaviour:
         WaveIndex: 3
         IsBossWave: 0
         DifficultyScalar: 1.4
-        PrepTime: 5.0
+        PrepTime: 1
         AutoStart: 1
         EarlyStartBonus: 0.1
         RewardTableId: "reward_3"
@@ -58,8 +58,8 @@ MonoBehaviour:
         Name: "Boss Wave"
         WaveIndex: 4
         IsBossWave: 1
-        DifficultyScalar: 2.0
-        PrepTime: 8.0
+        DifficultyScalar: 2
+        PrepTime: 1
         AutoStart: 0
         EarlyStartBonus: 0.15
         RewardTableId: "boss_reward_1"
@@ -72,7 +72,7 @@ MonoBehaviour:
         WaveIndex: 5
         IsBossWave: 0
         DifficultyScalar: 1.6
-        PrepTime: 5.0
+        PrepTime: 1
         AutoStart: 1
         EarlyStartBonus: 0.1
         RewardTableId: "reward_5"

@@ -9,8 +9,8 @@ namespace ExcelData
     [Serializable]
     public class SetBonusDataRow
     {
-        public bool SetId;
-        public bool PiecesRequired;
+        public int SetId;
+        public int PiecesRequired;
         public string BonusDescription;
         public string EffectHook;
         public string Values;

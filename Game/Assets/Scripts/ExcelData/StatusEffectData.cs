@@ -15,7 +15,7 @@ namespace ExcelData
         public int MaxStack;
         public float Value;
         public int Duration;
-        public bool TickInterval;
+        public int TickInterval;
         public string Notes;
     }
 

@@ -35,6 +35,7 @@ MonoBehaviour:
         BaseSkills: 101
         AiBehaviorId: 5
         ResistProfileId: 2
+        PrefabPath: "Enemies/FrostImp"
     - m_Item_1:
         Id: 202
         Name: "Fire Imp"
@@ -56,3 +57,4 @@ MonoBehaviour:
         BaseSkills: 102
         AiBehaviorId: 5
         ResistProfileId: 3
+        PrefabPath: "Enemies/FireImp"

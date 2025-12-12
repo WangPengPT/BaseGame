@@ -14,7 +14,7 @@ namespace ExcelData
         public int WaveIndex;
         public bool IsBossWave;
         public float DifficultyScalar;
-        public float PrepTime;
+        public int PrepTime;
         public bool AutoStart;
         public float EarlyStartBonus;
         public string RewardTableId;

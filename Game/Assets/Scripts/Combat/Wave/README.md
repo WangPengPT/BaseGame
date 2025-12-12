@@ -14,11 +14,9 @@ Wave系统用于管理游戏中的关卡流程，包括敌人生成、关卡进�
 - `DifficultyScalar`: 难度系数（影响敌人血量等）
 - `PrepTime`: 准备时间（秒）
 - `AutoStart`: 是否自动开始
-- `EarlyStartBonus`: 提前开始的奖励加成
 - `RewardTableId`: 奖励表ID
 - `SpawnPointGroupName`: 生成点组GameObject名称（场景中需有同名GameObject）
 - `CenterPointName`: 中心点GameObject名称（用于circle/arc模式）
-- `EnemyPrefabPath`: 敌人预制体路径（Resources路径，如 "Enemies/EnemyPrefab"）
 
 ### WaveEntryData (关卡敌人条目)
 - `Id`: 条目ID
@@ -47,12 +45,13 @@ Wave系统用于管理游戏中的关卡流程，包括敌人生成、关卡进�
 **WaveData.csv 字段说明：**
 - `spawn_point_group_name`: 生成点组GameObject名称（场景中需要有一个同名GameObject，其子对象作为生成点）
 - `center_point_name`: 中心点GameObject名称（用于circle/arc模式，场景中需要有同名GameObject）
-- `enemy_prefab_path`: 敌人预制体路径（Resources路径，如 "Enemies/EnemyPrefab"，预制体需放在Resources文件夹）
+
+**注意：** 敌人预制体路径现在在 `EnemyData.csv` 中配置，每个敌人/英雄都有自己的 `prefab_path` 字段。
 
 **示例配置：**
 ```csv
-id,name,wave_index,spawn_point_group_name,center_point_name,enemy_prefab_path
-1,Wave 1,1,SpawnPoints,CenterPoint,Enemies/EnemyPrefab
+id,name,wave_index,spawn_point_group_name,center_point_name
+1,Wave 1,1,SpawnPoints,CenterPoint
 ```
 
 ### 2. 在场景中设置GameObject
@@ -65,8 +64,9 @@ id,name,wave_index,spawn_point_group_name,center_point_name,enemy_prefab_path
 2. **中心点**：创建一个名为 `CenterPoint` 的GameObject（名称需与Excel中配置一致）
    - 用于circle和arc模式的中心参考点
 
-3. **敌人预制体**：将敌人预制体放在 `Resources/Enemies/` 文件夹下
-   - 路径需与Excel中 `enemy_prefab_path` 配置一致
+3. **敌人预制体**：将敌人预制体放在 `Resources/` 文件夹下
+   - 每个敌人的预制体路径在 `EnemyData.csv` 中的 `prefab_path` 字段配置
+   - 例如：`Enemies/FrostImp` 表示 `Resources/Enemies/FrostImp.prefab`
 
 ### 3. 在场景中添加WaveManager组件
 
@@ -163,7 +163,6 @@ waveManager.OnRewardsDropped += (rewards) => {
 
 1. **准备阶段 (Prep Phase)**
    - 显示倒计时
-   - 玩家可以提前开始（获得奖励加成）
 
 2. **关卡阶段 (Wave Phase)**
    - 根据WaveEntryData生成敌人
@@ -172,7 +171,6 @@ waveManager.OnRewardsDropped += (rewards) => {
 
 3. **奖励阶段 (Reward Phase)**
    - 根据WaveRewardData生成奖励
-   - 如果提前开始，应用奖励加成
    - 掉落奖励物品
 
 4. **下一关**
@@ -198,7 +196,7 @@ waveManager.OnRewardsDropped += (rewards) => {
 4. **敌人预制体路径**
    - 预制体必须放在 `Resources` 文件夹下
    - 路径格式：`"Enemies/EnemyPrefab"`（不需要扩展名）
-   - 路径需与Excel中 `enemy_prefab_path` 配置一致
+   - 路径在 `EnemyData.csv` 中的 `prefab_path` 字段配置，每个敌人/英雄都有自己的预制体路径
 
 5. **敌人预制体要求**
    - 必须包含 `CombatActor` 组件
@@ -208,11 +206,7 @@ waveManager.OnRewardsDropped += (rewards) => {
    - DifficultyScalar会影响敌人的基础血量
    - Boss关卡通常有更高的难度系数
 
-7. **提前开始奖励**
-   - 玩家可以在准备阶段按空格键提前开始
-   - 会获得EarlyStartBonus的奖励加成
-
-8. **自动配置**
-   - PrepTime、AutoStart、EarlyStartBonus等参数都从Excel中读取
+7. **自动配置**
+   - PrepTime、AutoStart等参数都从Excel中读取
    - 每个关卡可以有不同的配置
 

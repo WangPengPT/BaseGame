@@ -15,7 +15,7 @@ namespace ExcelData
         public string PrimaryElement;
         public int BaseHp;
         public int BaseMp;
-        public bool Armor;
+        public int Armor;
         public float PhysicalResist;
         public float MagicalResist;
         public float IceResist;
@@ -29,6 +29,7 @@ namespace ExcelData
         public int BaseSkills;
         public int AiBehaviorId;
         public int ResistProfileId;
+        public string PrefabPath;
     }
 
     [CreateAssetMenu(fileName = "EnemyData", menuName = "ExcelData/EnemyData")]
